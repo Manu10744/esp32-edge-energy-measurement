@@ -1,0 +1,15 @@
+menu "WiFi Connection Settings"
+    
+    choice WIFI_SETTINGS
+
+        bool "Choose from predefined profiles"
+        default HOME_WIFI_SETTINGS
+        
+        config USE_HOME_WIFI_SETTINGS
+            bool "Use WiFi settings from home"
+        config USE_INSTITUTE_WIFI_SETTINGS
+            bool "Use WiFi settings from TUM institute"
+
+    endchoice
+
+endmenu

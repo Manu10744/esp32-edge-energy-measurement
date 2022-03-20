@@ -1,5 +1,17 @@
 menu "UDP Server Configuration"
     
+    config USE_IPV4_STACK
+        bool "IPV4"
+        default y
+        help 
+            Soll IPv4 für den Server benutzt werden?
+
+    config USE_IPV6_STACK
+        bool "IPV6"
+        default n
+        help 
+            Soll IPv6 für den Server genutzt werden?
+        
     config PORT
         int "Port"
         range 0 65535
