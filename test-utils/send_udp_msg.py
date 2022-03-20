@@ -14,9 +14,7 @@ def get_args():
                            help="Port of the target UDP server.")
     argparser.add_argument("--message", metavar="<msg>", required=True, 
                            help="The message to send to the UDP server.")
-
-    ip_stack_group = argparser.add_mutually_exclusive_group()
-    ip_stack_group.add_argument("--use-ipv6", action="store_const", dest="ip_stack", const=socket.AF_INET6,
+    argparser.add_argument("--use-ipv6", action="store_const", dest="ip_stack", const=socket.AF_INET6,
                                 default=socket.AF_INET, help="Use IPv6 instead of IPv4 stack for the socket.")
 
     return argparser.parse_args()
