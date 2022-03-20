@@ -20,6 +20,8 @@
 #define WIFI_PASS "caps!schulz-wifi"
 #endif
 
+#define WIFI_CONNECT_MAXIMUM_RETRIES 3
+
 static const char *TAG = "WIFI";
 
 /* FreeRTOS event group to signal when we are connected*/
@@ -36,7 +38,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        if (s_retry_num < 3) {
+        if (s_retry_num < WIFI_CONNECT_MAXIMUM_RETRIES) {
             esp_wifi_connect();
             s_retry_num++;
             ESP_LOGI(TAG, "Retrying to connect to the AP ...");
@@ -53,11 +55,11 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 }
 
 /**
- * Connects to a WiFi access point using the configured WiFi profile, which configures
- * the AP's SSID and password.
+ * Connects to the WiFi access point that is determined by the chosen WiFi profile in the
+ * project configuration. WiFi SSID and password are set based on the chosen profile.
  */
 void connect_to_wifi(void) {
-    //Initialize NVS
+    // Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
       ESP_ERROR_CHECK(nvs_flash_erase());

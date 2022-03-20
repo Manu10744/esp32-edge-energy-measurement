@@ -66,11 +66,45 @@ void setup_udp_server(void *task_params) {
         }
         ESP_LOGI(TAG, "Socket successfully bound to port %d", PORT);
 
+        ESP_LOGI(TAG, "Starting to listen for incoming connections ...");
         while (1) {
-            ESP_LOGI(TAG, "Waiting for data ...");
+            struct sockaddr_storage source_addr; // Large enough for both IPv4 or IPv6
+            socklen_t socklen = sizeof(source_addr);
+            int len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&source_addr, &socklen);
+
+            if (len < 0) {
+                // Error occurred during receiving
+                ESP_LOGE(TAG, "recvfrom failed: errno %d", errno);
+                break;
+            } else {
+                // Received some data
+                // Get the sender's ip address as string
+                if (source_addr.ss_family == PF_INET) {
+                    inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr, addr_str, sizeof(addr_str) - 1);
+                } else if (source_addr.ss_family == PF_INET6) {
+                    inet6_ntoa_r(((struct sockaddr_in6 *)&source_addr)->sin6_addr, addr_str, sizeof(addr_str) - 1);
+                }
+
+                rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string...
+                ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
+                ESP_LOGI(TAG, "%s", rx_buffer);
+
+                int err = sendto(sock, rx_buffer, len, 0, (struct sockaddr *)&source_addr, sizeof(source_addr));
+                if (err < 0) {
+                    ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
+                    break;
+                }
+            }
+        }
+
+        if (sock != -1) {
+            ESP_LOGE(TAG, "Shutting down socket and restarting...");
+            shutdown(sock, 0);
+            close(sock);
         }
     }
 
+    // Critical error occured
     vTaskDelete(NULL);
 }
 
@@ -79,17 +113,16 @@ void setup_udp_server(void *task_params) {
 void app_main(void) {
     esp_log_level_set(TAG, ESP_LOG_INFO);
 
-    // Establish a WiFi connection
+    // Step 1: Establish a WiFi connection
     connect_to_wifi();
 
-    // Start UDP server and listen for connections
-    /*
+    // Step 2: Start UDP server and listen for connections
 #ifdef CONFIG_USE_IPV4_STACK
-    ESP_LOGI(TAG, "Using IPv4 stack!");
+    ESP_LOGI(TAG, "Using IPv4 stack for UDP server socket!");
     xTaskCreate(setup_udp_server, "udp_server", 4096, (void*)AF_INET, 5, NULL);
 #endif
 #ifdef CONFIG_USE_IPV6_STACK
-    ESP_LOGI(TAG, "Using IPv6 stack!");
+    ESP_LOGI(TAG, "Using IPv6 stack for UDP server socket!");
     xTaskCreate(setup_udp_server, "udp_server", 4096, (void*)AF_INET6, 5, NULL);
-#endif */
+#endif 
 }
