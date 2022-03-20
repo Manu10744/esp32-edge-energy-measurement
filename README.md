@@ -7,11 +7,12 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 
 ### Table of Contents
 #### Main components
-- `udp_client`: contains the source code for the UDP client that is used.
-- `udp_server`: contains the source code for the UDP server that is used.
+- `udp_client`: Contains the source code for the UDP client that is used.
+- `udp_server`: Contains the source code for the UDP server that is used.
+- `functions`: Contains the serverless function(s) to apply for tests.
 
 #### Test utils
-- `test-utils`: scripts and utilities to test functionality
+- `test-utils`: scripts and utilities to test functionality.
 
 #
 
