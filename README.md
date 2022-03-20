@@ -1,12 +1,17 @@
 # Power Measurement Framework for edge-enabled IoT devices
 
-Measure the power consumption of serverless functions executed on edge-enabled devices and push the data to the existing Function Delivery Network (FDN) infrastructure (Prometheus & Grafana)
+Measure the power consumption of serverless functions executed on edge-enabled devices and push the data to the existing Function Delivery Network (FDN) infrastructure (Prometheus & Grafana).<br>
+The power consumption measurements are carried out by a ESP32 powermeter.
 
 <br>
 
 ### Table of Contents
+#### Main components
 - `udp_client`: contains the source code for the UDP client that is used.
 - `udp_server`: contains the source code for the UDP server that is used.
+
+#### Test utils
+- `test-utils`: scripts and utilities to test functionality
 
 #
 
