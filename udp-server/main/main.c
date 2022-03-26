@@ -3,12 +3,15 @@
 #include "freertos/task.h"
 #include "sdkconfig.h"
 #include "esp_log.h"
-
 #include "lwip/sockets.h"
 
 #include "wifi.h"
+#include "power_measurement.h"
 
 #define PORT CONFIG_PORT
+
+#define RECEIVE_BUFFER_SIZE 128
+#define SEND_BUFFER_SIZE 1024
 
 static const char *TAG = "UDP_SERVER";
 
@@ -21,8 +24,9 @@ static const char *TAG = "UDP_SERVER";
  * 
  * @param taskParams pointer to the task's parameters.
  */
-void setup_udp_server(void *task_params) {
-    char rx_buffer[128];
+void start_udp_server(void *task_params) {
+    char rx_buffer[RECEIVE_BUFFER_SIZE] = {0};
+    char tx_buffer[SEND_BUFFER_SIZE] = {0};
     char addr_str[128];
     int addr_family = (int)task_params;
     int ip_protocol = 0;
@@ -70,9 +74,9 @@ void setup_udp_server(void *task_params) {
         while (1) {
             struct sockaddr_storage source_addr; // Large enough for both IPv4 or IPv6
             socklen_t socklen = sizeof(source_addr);
-            int len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&source_addr, &socklen);
+            int rx_data_len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&source_addr, &socklen);
 
-            if (len < 0) {
+            if (rx_data_len < 0) {
                 // Error occurred during receiving
                 ESP_LOGE(TAG, "recvfrom failed: errno %d", errno);
                 break;
@@ -85,15 +89,23 @@ void setup_udp_server(void *task_params) {
                     inet6_ntoa_r(((struct sockaddr_in6 *)&source_addr)->sin6_addr, addr_str, sizeof(addr_str) - 1);
                 }
 
-                rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string...
-                ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
-                ESP_LOGI(TAG, "%s", rx_buffer);
+                rx_buffer[rx_data_len] = 0; // Null-terminate whatever we received and treat like a string...
+                ESP_LOGI(TAG, "Received %d bytes from %s: %s", rx_data_len, addr_str, rx_buffer);
 
-                int err = sendto(sock, rx_buffer, len, 0, (struct sockaddr *)&source_addr, sizeof(source_addr));
-                if (err < 0) {
-                    ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
-                    break;
+                while (1) {
+                    float curr_measurement = get_shunt_current();
+                    int tx_data_len = sprintf(tx_buffer, "%f", curr_measurement);
+                    tx_buffer[tx_data_len] = '\0';
+                    int err = sendto(sock, tx_buffer, tx_data_len, 0, (struct sockaddr *)&source_addr, sizeof(source_addr));
+
+                    if (err < 0) {
+                        ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
+                        break;
+                    }
+                    
+                    vTaskDelay(pdMS_TO_TICKS(1000));
                 }
+                break;               
             }
         }
 
@@ -108,21 +120,22 @@ void setup_udp_server(void *task_params) {
     vTaskDelete(NULL);
 }
 
-
-
 void app_main(void) {
     esp_log_level_set(TAG, ESP_LOG_INFO);
 
     // Step 1: Establish a WiFi connection
     connect_to_wifi();
 
-    // Step 2: Start UDP server and listen for connections
+    // Step 2: Start power measurement
+    xTaskCreate(start_power_measurements, "ina3221_power_measurement", configMINIMAL_STACK_SIZE * 8, NULL, 2, NULL);
+
+    // Step 3: Start UDP server and listen for connections
 #ifdef CONFIG_USE_IPV4_STACK
     ESP_LOGI(TAG, "Using IPv4 stack for UDP server socket!");
-    xTaskCreate(setup_udp_server, "udp_server", 4096, (void*)AF_INET, 5, NULL);
+    xTaskCreate(start_udp_server, "udp_server", 4096, (void*)AF_INET, 5, NULL);
 #endif
 #ifdef CONFIG_USE_IPV6_STACK
     ESP_LOGI(TAG, "Using IPv6 stack for UDP server socket!");
-    xTaskCreate(setup_udp_server, "udp_server", 4096, (void*)AF_INET6, 5, NULL);
+    xTaskCreate(start_udp_server, "udp_server", 4096, (void*)AF_INET6, 5, NULL);
 #endif 
 }

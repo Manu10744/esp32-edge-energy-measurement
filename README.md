@@ -25,6 +25,6 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 
 ### TO-DOs
 - [x] Setup UDP connection between ESP32 and Jetson Nano
-- [ ] Send energy measurements to the Jetson Nano
+- [x] Send energy measurements to the Jetson Nano
 - [ ] Store received energy measurements on the Jetson Nano
 - [ ] Send energy measurements to the Prometheus Agent
