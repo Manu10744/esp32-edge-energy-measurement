@@ -114,7 +114,7 @@ void start_udp_server(void *task_params) {
         }
 
         if (sock != -1) {
-            ESP_LOGE(TAG, "Shutting down socket and restarting...");
+            ESP_LOGI(TAG, "Shutting down socket and restarting...");
             shutdown(sock, 0);
             close(sock);
         }

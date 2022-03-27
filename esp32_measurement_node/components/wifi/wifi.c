@@ -41,22 +41,24 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         if (s_retry_num < WIFI_CONNECT_MAXIMUM_RETRIES) {
             esp_wifi_connect();
             s_retry_num++;
-            ESP_LOGI(TAG, "Retrying to connect to the AP ...");
+            ESP_LOGW(TAG, "Retrying to connect to the AP ...");
         } else {
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
         }
-        ESP_LOGI(TAG,"Failed to connect to the AP!");
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        ESP_LOGI(TAG, "Connection successful, got assigned an IP: " IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0;
+
+        ESP_LOGI(TAG, "Connection successful, got assigned an IP: " IPSTR, IP2STR(&event->ip_info.ip));
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
 }
 
 /**
- * Connects to the WiFi access point that is determined by the chosen WiFi profile in the
- * project configuration. WiFi SSID and password are set based on the chosen profile.
+ * Connects to an WiFi access point.
+ * 
+ * The WiFi AP's SSID and password that are used for the connection are determined
+ * by the project configuration.
  */
 void connect_to_wifi(void) {
     // Initialize NVS
@@ -111,7 +113,7 @@ void connect_to_wifi(void) {
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start() );
 
-    ESP_LOGI(TAG, "WiFi init finished.");
+    ESP_LOGI(TAG, "WiFi configuration initialization finished.");
 
     /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
      * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
@@ -126,9 +128,9 @@ void connect_to_wifi(void) {
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG, "Connected to the Access Point (SSID: %s | password: %s)", WIFI_SSID, WIFI_PASSWORD);
     } else if (bits & WIFI_FAIL_BIT) {
-        ESP_LOGI(TAG, "Failed to connect the Access Point (SSID:%s | password:%s)", WIFI_SSID, WIFI_PASSWORD);
+        ESP_LOGE(TAG, "Failed to connect the Access Point (SSID: %s | password: %s)", WIFI_SSID, WIFI_PASSWORD);
     } else {
-        ESP_LOGE(TAG, "UNEXPECTED EVENT");
+        ESP_LOGE(TAG, "An unexpected event occured.");
     }
 
     /* The event will not be processed after unregister */
