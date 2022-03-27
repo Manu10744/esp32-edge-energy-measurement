@@ -1,4 +1,4 @@
-# UDP Server
+# ESP32 & INA3221
 
 
 ### Configuration & Usage

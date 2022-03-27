@@ -3,12 +3,20 @@
 Measure the power consumption of serverless functions executed on edge-enabled devices and push the data to the existing Function Delivery Network (FDN) infrastructure (Prometheus & Grafana).<br>
 The power consumption measurements are carried out by a ESP32 powermeter.
 
+### Hardware Setup
+
+<img src="./img/hardware_setup.jpg" height="350px" width="300px">
+
+- `INA3221`: the power measurement sensor with three channels
+- `ESP32`: the microcontroller where the main software runs
+- `SSD1306`: display that can optionally be used to display power measurements.
+
 <br>
 
 ### Table of Contents
 #### Main components
-- `udp_client`: Contains the source code for the UDP client that is used.
-- `udp_server`: Contains the source code for the UDP server that is used.
+- `udp_client`: Contains the source code for the UDP client that can be used at the edge devices.
+- `esp32_measurement_node`: Contains the source code for the ESP32 powermeter that measures the power consumption and sends them to the edge devices via UDP communication.
 - `functions`: Contains the serverless function(s) to apply for tests.
 
 #### Test utils

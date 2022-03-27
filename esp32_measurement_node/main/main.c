@@ -17,7 +17,11 @@ static const char *TAG = "UDP_SERVER";
 
 /**
  * Starts a UDP server using the configured IP stack (IPv4 / IPv6) on the configured 
- * port. Server will restart itself on errors.
+ * port. The server will restart itself on errors.
+ * 
+ * Once the server receives a data package from an arbitrary client, it will look up the
+ * current power measurement from the INA3221 and send it to the client as a string 
+ * representation instead of raw bits in order to facilitate portability.
  * 
  * This function should be handed to xTaskCreate() in order to start the UDP server 
  * in a dedicated task.
