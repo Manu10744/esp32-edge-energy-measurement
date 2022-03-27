@@ -5,11 +5,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "udp_client.h"
+
 #define IP_PROTOCOL 0
 #define RECEIVE_BUFFER_SIZE 1024
-
-void setup_udp_connection(char server_ip[], uint16_t port);
-
 
 char server_ip[50];
 uint16_t port;
@@ -26,13 +25,13 @@ void setup_udp_connection(char server_ip[], uint16_t port) {
     char hello_msg[] = "Hello from the Jetson Nano!";
     char rx_buffer[RECEIVE_BUFFER_SIZE] = {0};
 
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port);   
+
     if ((sock = socket(AF_INET, SOCK_DGRAM, IP_PROTOCOL)) < 0) {
         printf("\nCould not create socket!\n");
         return;
     }
-
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(port);
 
     if (inet_pton(AF_INET, server_ip, &serv_addr.sin_addr) <= 0) {
         printf("\nThe address %s is either invalid or not supported!\n", server_ip);
@@ -45,10 +44,8 @@ void setup_udp_connection(char server_ip[], uint16_t port) {
     }
 
     send(sock, hello_msg, strlen(hello_msg), 0);
-
     while (1) {
         valread = read(sock , rx_buffer, RECEIVE_BUFFER_SIZE);
-
         if (valread < 0) {
             printf("Error during receiving!");
             break;
@@ -59,7 +56,6 @@ void setup_udp_connection(char server_ip[], uint16_t port) {
 }
 
 int main(int argc, char *argv[]) {
-
     if (argc != 3) {
         printf("\nUsage: %s <server_ip> <server_port> \n", argv[0]);
         return EXIT_FAILURE;
