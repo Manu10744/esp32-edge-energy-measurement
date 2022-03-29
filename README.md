@@ -36,5 +36,6 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - [x] Send energy measurements to the Jetson Nano
 - [ ] Store received energy measurements on the Jetson Nano
 - [x] Install Grafana & Prometheus on local k8s
-- [ ] Write custom prometheus exporter for the power measurements so prometheus is able to poll the data
+- [ ] Write custom prometheus exporter for the power measurements so prometheus is able to poll the data - use sample data until later
 - [ ] Test custom prometheus exporter in test k8s
+- [ ] Adjust exporter so it sends the power measurements instead of sample data
