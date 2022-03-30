@@ -22,6 +22,7 @@ Dashboard Authentication is disabled, dashboard-default `ServiceAccount` has rol
 cd grafana
 kubectl apply -f grafana-datasource.yaml
 kubectl apply -f grafana-deployment.yaml
+kubectl apply -f grafana-service.yaml
 kubectl apply -f grafana-ingress.yaml
 ```
 Default credentials: `username`: admin | `password`: admin
@@ -30,6 +31,7 @@ Default credentials: `username`: admin | `password`: admin
 ```bash
 cd prometheus
 kubectl apply -f prometheus-deployment.yaml
+kubectl apply -f prometheus-service.yaml
 kubectl apply -f prometheus-ingress.yaml
 ```
 
