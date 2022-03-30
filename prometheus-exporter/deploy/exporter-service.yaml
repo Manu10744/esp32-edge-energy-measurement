@@ -3,11 +3,15 @@ kind: Service
 metadata:
   namespace: monitoring
   name: prometheus-power-collector-service
+  labels:
+    app: prometheus-power-collector
+  annotations:
+    prometheus.io/scrape: 'true'
 spec:
   selector:
     app: prometheus-power-collector
   type: NodePort
   ports:
-  - protocol: TCP
-    port: 80
+  - name: http
+    port: 8080
     targetPort: 8000

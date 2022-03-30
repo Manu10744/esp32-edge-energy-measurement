@@ -118,9 +118,67 @@ data:
     global:
       scrape_interval: 5s
       evaluation_interval: 5s
+
+      external_labels:
+        monitor: 'prometheus-power-collector'
+
     rule_files:
       - /etc/prometheus/prometheus.rules
+
     scrape_configs:
+      - job_name: 'prometheus-power-collector'
+        scrape_interval: 15s
+
+        metrics_path: /metrics
+        scheme: http
+
+        kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names:
+            - monitoring
+
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_service_label_app]
+          separator: ;
+          regex: prometheus-power-collector
+          replacement: $1
+          action: keep
+        - source_labels: [__meta_kubernetes_endpoint_port_name]
+          separator: ;
+          regex: http
+          replacement: $1
+          action: keep
+        - source_labels: [__meta_kubernetes_namespace]
+          separator: ;
+          regex: (.*)
+          target_label: namespace
+          replacement: $1
+          action: replace
+        - source_labels: [__meta_kubernetes_pod_name]
+          separator: ;
+          regex: (.*)
+          target_label: pod
+          replacement: $1
+          action: replace
+        - source_labels: [__meta_kubernetes_service_name]
+          separator: ;
+          regex: (.*)
+          target_label: service
+          replacement: $1
+          action: replace
+        - source_labels: [__meta_kubernetes_service_name]
+          separator: ;
+          regex: (.*)
+          target_label: job
+          replacement: ${1}
+          action: replace
+        - separator: ;
+          regex: (.*)
+          target_label: endpoint
+          replacement: http
+          action: replace
+
       - job_name: 'node-exporter'
 
         kubernetes_sd_configs:
@@ -262,6 +320,7 @@ spec:
       containers:
         - name: prometheus
           image: prom/prometheus
+          imagePullPolicy: IfNotPresent
           args:
             - "--config.file=/etc/prometheus/prometheus.yml"
             - "--storage.tsdb.path=/prometheus/"
@@ -277,6 +336,5 @@ spec:
           configMap:
             defaultMode: 420
             name: prometheus-server-conf
-
         - name: prometheus-storage-volume
           emptyDir: {}
