@@ -1,3 +1,4 @@
+# Prometheus datasource configuration for Grafana
 apiVersion: v1
 kind: Namespace
 metadata:
