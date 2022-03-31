@@ -13,7 +13,8 @@
 #define I2C_SDA_PIN 21
 #define I2C_SCL_PIN 22
 
-#define CONTINUOUS_MODE true 
+#define CONTINUOUS_MODE true
+#define MEASUREMENT_INTERVAL_MS 10
 
 static const char *TAG = "POWER_MEASUREMENT";
 
@@ -23,17 +24,15 @@ static ina3221_t dev = {
     .mask.mask_register = INA3221_DEFAULT_MASK
 };
 
-bool measure_energy = true;
-float bus_voltage;
 float shunt_voltage;
 float shunt_current2;
 float shunt_current3;
 
-uint64_t energy=0, lastEnergy = 0;
-uint64_t lastMeasurement = 0;
+uint64_t energy = 0;
+uint64_t last_measurement = 0;
 
 /*
- * Initializes the INA3221 power measurement device.
+ * Initializes the INA3221 power measurement sensor.
  */
 void init_INA3221(void) {
     ESP_LOGI(TAG, "Initializing INA3221 ...");
@@ -53,8 +52,8 @@ void init_INA3221(void) {
 }
 
 /**
- * Executes a power measurement for channel 2 and 3 and stores the measurements in
- * shunt_current2 and shunt_current3 respectively.
+ * Executes a power measurement for channel 2 and 3 and stores the current (mA)
+ * in the variables shunt_current2 and shunt_current3 respectively.
  */
 void exec_measurement(void) {
     ESP_ERROR_CHECK(ina3221_get_status(&dev)); // get mask
@@ -79,20 +78,19 @@ void start_power_measurements(void *task_params) {
     init_INA3221();
 
     ESP_LOGI(TAG, "Starting the power measurements ...");
-    lastMeasurement = esp_timer_get_time();
+    last_measurement = esp_timer_get_time();
+
     while (1) {
-        uint64_t diffMicroSeconds;
-        uint64_t currentTimestamp;
+        uint64_t timestamp_diff_microseconds;
+        uint64_t new_measurement;
 
         exec_measurement();
-        currentTimestamp = esp_timer_get_time();
+        new_measurement = esp_timer_get_time();
 
-        if (measure_energy) {
-            diffMicroSeconds = (currentTimestamp - lastMeasurement);
-            energy = energy + shunt_current3 * diffMicroSeconds;
-        }
-        lastMeasurement = currentTimestamp;
-
-        vTaskDelay(pdMS_TO_TICKS(10));
+        timestamp_diff_microseconds = new_measurement - last_measurement;
+        energy += shunt_current3 * timestamp_diff_microseconds;
+        
+        last_measurement = new_measurement;
+        vTaskDelay(pdMS_TO_TICKS(MEASUREMENT_INTERVAL_MS));
     }
 }

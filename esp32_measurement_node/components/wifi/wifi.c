@@ -34,7 +34,7 @@ static EventGroupHandle_t s_wifi_event_group;
 static int s_retry_num = 0;
 
 static void event_handler(void* arg, esp_event_base_t event_base,
-                                int32_t event_id, void* event_data) {
+                          int32_t event_id, void* event_data) {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
@@ -55,10 +55,10 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 }
 
 /**
- * Connects to an WiFi access point.
+ * Connects the ESP32 to a WiFi Access Point.
  * 
- * The WiFi AP's SSID and password that are used for the connection are determined
- * by the project configuration.
+ * WiFi SSID and password are derived from the configured WiFi settings
+ * in the project configuration.
  */
 void connect_to_wifi(void) {
     // Initialize NVS
