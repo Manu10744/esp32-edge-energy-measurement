@@ -12,6 +12,7 @@
 
 #define RECEIVE_BUFFER_SIZE 128
 #define SEND_BUFFER_SIZE 1024
+#define SEND_INTERVAL_MS 1000
 
 static const char *TAG = "UDP_SERVER";
 
@@ -97,8 +98,8 @@ void start_udp_server(void *task_params) {
                 ESP_LOGI(TAG, "Received %d bytes from %s: %s", rx_data_len, addr_str, rx_buffer);
 
                 while (1) {
-                    float curr_measurement = get_shunt_current();
-                    int tx_data_len = sprintf(tx_buffer, "%f", curr_measurement);
+                    struct ina3221_measurement measurement = get_measurement(2); // TODO: insert the individual channel here, coming from the client message
+                    int tx_data_len = sprintf(tx_buffer, "%llu", measurement.energy_consumption);
                     tx_buffer[tx_data_len] = '\0';
                     int err = sendto(sock, tx_buffer, tx_data_len, 0, (struct sockaddr *)&source_addr, sizeof(source_addr));
 
@@ -107,7 +108,7 @@ void start_udp_server(void *task_params) {
                         break;
                     }
                     
-                    vTaskDelay(pdMS_TO_TICKS(1000));
+                    vTaskDelay(pdMS_TO_TICKS(SEND_INTERVAL_MS));
                 }
                 break;               
             }

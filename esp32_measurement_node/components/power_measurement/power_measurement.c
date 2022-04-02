@@ -15,6 +15,7 @@
 
 #define CONTINUOUS_MODE true
 #define MEASUREMENT_INTERVAL_MS 10
+#define AMOUNT_OF_CHANNELS 3
 
 static const char *TAG = "POWER_MEASUREMENT";
 
@@ -24,17 +25,12 @@ static ina3221_t dev = {
     .mask.mask_register = INA3221_DEFAULT_MASK
 };
 
-float shunt_voltage;
-float shunt_current2;
-float shunt_current3;
-
-uint64_t energy = 0;
-uint64_t last_measurement = 0;
+struct ina3221_measurement measurements[AMOUNT_OF_CHANNELS];
 
 /*
  * Initializes the INA3221 power measurement sensor.
  */
-void init_INA3221(void) {
+void init_ina3221(void) {
     ESP_LOGI(TAG, "Initializing INA3221 ...");
     memset(&dev.i2c_dev, 0, sizeof(i2c_dev_t));
 
@@ -52,18 +48,54 @@ void init_INA3221(void) {
 }
 
 /**
- * Executes a power measurement for channel 2 and 3 and stores the current (mA)
- * in the variables shunt_current2 and shunt_current3 respectively.
+ * Executes a INA3221 power measurement for the given INA3221channel and returns
+ * the data related to this measurement.
+ * 
+ * @param channel index of the channel that should be measured.
+ * @return the new power measurement of the given channel.
  */
-void exec_measurement(void) {
+struct ina3221_measurement exec_measurement(int channel) {
     ESP_ERROR_CHECK(ina3221_get_status(&dev)); // get mask
 
-    ESP_ERROR_CHECK(ina3221_get_shunt_value(&dev, 1, &shunt_voltage, &shunt_current2));
-    ESP_ERROR_CHECK(ina3221_get_shunt_value(&dev, 2, &shunt_voltage, &shunt_current3));
+    struct ina3221_measurement prev_measurement = measurements[channel];
+    struct ina3221_measurement new_measurement;
+    float shunt_current;
+    float voltage;
+
+    ESP_ERROR_CHECK(ina3221_get_shunt_value(&dev, channel, &voltage, &shunt_current));
+    new_measurement.timestamp = esp_timer_get_time();
+
+    uint64_t elapsed_microseconds = new_measurement.timestamp - prev_measurement.timestamp;
+    new_measurement.energy_consumption = prev_measurement.energy_consumption + (shunt_current * elapsed_microseconds);
+
+    return new_measurement;
 }
 
-float get_shunt_current(void) {
-    return shunt_current3;
+/**
+ * Returns the current power measurement for the given INA3221 channel.
+ * 
+ * @param channel index of the channel that should be measured.
+ * @return the current power measurement of the given channel.
+ */
+struct ina3221_measurement get_measurement(int channel) {
+    if (channel >= AMOUNT_OF_CHANNELS) {
+        ESP_LOGE(TAG, "Unknown channel: %d", channel);
+    }
+
+    return measurements[channel];
+}
+
+/**
+ * Initializes the measurements for each INA3221 channel.
+ */
+void init_measurements() {
+    for (int channel = 0; channel < AMOUNT_OF_CHANNELS; channel++) {
+        struct ina3221_measurement init_measurement;
+        init_measurement.timestamp = esp_timer_get_time();
+        init_measurement.energy_consumption = 0;
+
+        measurements[channel] = init_measurement;
+    }
 }
 
 /**
@@ -75,22 +107,14 @@ float get_shunt_current(void) {
  * @param task_params pointer to the task's parameters.
  */
 void start_power_measurements(void *task_params) {
-    init_INA3221();
+    init_ina3221();
+    init_measurements();
 
     ESP_LOGI(TAG, "Starting the power measurements ...");
-    last_measurement = esp_timer_get_time();
-
     while (1) {
-        uint64_t timestamp_diff_microseconds;
-        uint64_t new_measurement;
-
-        exec_measurement();
-        new_measurement = esp_timer_get_time();
-
-        timestamp_diff_microseconds = new_measurement - last_measurement;
-        energy += shunt_current3 * timestamp_diff_microseconds;
-        
-        last_measurement = new_measurement;
+        for (int channel = 0; channel < AMOUNT_OF_CHANNELS; channel++) {
+            measurements[channel] = exec_measurement(channel);
+        }
         vTaskDelay(pdMS_TO_TICKS(MEASUREMENT_INTERVAL_MS));
     }
 }
