@@ -38,9 +38,10 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - [x] Install Grafana & Prometheus on local k8s
 - [x] Write custom prometheus exporter for the power measurements so prometheus is able to poll the data - use sample data until later
 - [x] Test custom prometheus exporter in test k8s
-- [ ] Adjust prometheus exporter so it sends the power measurements instead of sample data
-- [ ] Adjust code in powermeasurement component to measure power consumption of multiple devices (multiple channels) -> it has to be possible to use more than 1x INA3221 as well (-> project configuration).
-- [ ] Make UDP client send a certain channel ID to demand the correct power measurements for it
+- [ ] Adjust prometheus exporter so it exposes the power measurements to prometheus instead of sample data
+- [x] Adjust code in powermeasurement component to measure power consumption of multiple devices (multiple channels)
+- [ ] Adjust code to make it possible to use more than 1x INA3221 (-> project configuration).
+- [ ] Make UDP client send a certain channel ID to demand the power measurements for it instead of hardcoding channel 3 
 - [ ] Adjust code in UDP server to send the correct power measurements to multiple connected clients / devices
 - [ ] Expand the hardware setup to 1x Jetson Nano + 1x ESP32 and make sure it works
 - [ ] Deploy the exporter for the ESP32 and expand the grafana dashboard with a panel for the ESP32 exporter (-> Setup: 2x exporters / 2 panels in grafana)
