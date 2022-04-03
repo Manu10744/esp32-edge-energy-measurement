@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "sdkconfig.h"
@@ -20,9 +21,8 @@ static const char *TAG = "UDP_SERVER";
  * Starts a UDP server using the configured IP stack (IPv4 / IPv6) on the configured 
  * port. The server will restart itself on errors.
  * 
- * Once the server receives a data package from an arbitrary client, it will look up the
- * current power measurement from the INA3221 and send it to the client as a string 
- * representation instead of raw bits in order to facilitate portability.
+ * The server expects the client to send the INA3221 channel it wants to fetch
+ * power measurements from.
  * 
  * This function should be handed to xTaskCreate() in order to start the UDP server 
  * in a dedicated task.
@@ -86,28 +86,28 @@ void start_udp_server(void *task_params) {
                 ESP_LOGE(TAG, "recvfrom failed: errno %d", errno);
                 break;
             } else {
-                // Received some data
-                // Get the sender's ip address as string
+                // Received a message.
                 if (source_addr.ss_family == PF_INET) {
                     inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr, addr_str, sizeof(addr_str) - 1);
                 } else if (source_addr.ss_family == PF_INET6) {
                     inet6_ntoa_r(((struct sockaddr_in6 *)&source_addr)->sin6_addr, addr_str, sizeof(addr_str) - 1);
                 }
 
-                rx_buffer[rx_data_len] = 0; // Null-terminate whatever we received and treat like a string...
+                rx_buffer[rx_data_len] = '\0';
                 ESP_LOGI(TAG, "Received %d bytes from %s: %s", rx_data_len, addr_str, rx_buffer);
 
+                int requested_channel = atoi(rx_buffer);
+                ESP_LOGI(TAG, "Client requested channel ID %d.", requested_channel);
                 while (1) {
-                    struct ina3221_measurement measurement = get_measurement(2); // TODO: insert the individual channel here, coming from the client message
+                    struct ina3221_measurement measurement = get_measurement(requested_channel - 1);
                     int tx_data_len = sprintf(tx_buffer, "%llu", measurement.energy_consumption);
                     tx_buffer[tx_data_len] = '\0';
-                    int err = sendto(sock, tx_buffer, tx_data_len, 0, (struct sockaddr *)&source_addr, sizeof(source_addr));
 
+                    int err = sendto(sock, tx_buffer, tx_data_len, 0, (struct sockaddr *)&source_addr, sizeof(source_addr));
                     if (err < 0) {
                         ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
                         break;
                     }
-                    
                     vTaskDelay(pdMS_TO_TICKS(SEND_INTERVAL_MS));
                 }
                 break;               

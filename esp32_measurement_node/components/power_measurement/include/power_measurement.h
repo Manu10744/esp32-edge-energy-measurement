@@ -2,7 +2,7 @@
 #define __POWER_MEASUREMENT_H__
 
 /**
- * This struct contains the data related to a power consumption measurement 
+ * Contains the data related to a power consumption measurement 
  * of one specific channel.
  * 
  *  - timestamp              timestamp of the measurement in microseconds.

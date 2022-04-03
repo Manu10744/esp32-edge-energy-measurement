@@ -41,7 +41,7 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - [ ] Adjust prometheus exporter so it exposes the power measurements to prometheus instead of sample data
 - [x] Adjust code in powermeasurement component to measure power consumption of multiple devices (multiple channels)
 - [ ] Adjust code to make it possible to use more than 1x INA3221 (-> project configuration).
-- [ ] Make UDP client send a certain channel ID to demand the power measurements for it instead of hardcoding channel 3 
+- [x] Make UDP client send a certain channel ID to demand the power measurements for it instead of hardcoding channel 3 
 - [ ] Adjust code in UDP server to send the correct power measurements to multiple connected clients / devices
 - [ ] Expand the hardware setup to 1x Jetson Nano + 1x ESP32 and make sure it works
 - [ ] Deploy the exporter for the ESP32 and expand the grafana dashboard with a panel for the ESP32 exporter (-> Setup: 2x exporters / 2 panels in grafana)

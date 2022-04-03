@@ -51,7 +51,7 @@ void init_ina3221(void) {
  * Executes a INA3221 power measurement for the given INA3221channel and returns
  * the data related to this measurement.
  * 
- * @param channel index of the channel that should be measured.
+ * @param channel index of the channel that is measured.
  * @return the new power measurement of the given channel.
  */
 struct ina3221_measurement exec_measurement(int channel) {
@@ -67,21 +67,20 @@ struct ina3221_measurement exec_measurement(int channel) {
 
     uint64_t elapsed_microseconds = new_measurement.timestamp - prev_measurement.timestamp;
     new_measurement.energy_consumption = prev_measurement.energy_consumption + (shunt_current * elapsed_microseconds);
-
+    
     return new_measurement;
 }
 
 /**
  * Returns the current power measurement for the given INA3221 channel.
  * 
- * @param channel index of the channel that should be measured.
- * @return the current power measurement of the given channel.
+ * @param channel index of the channel that is measured.
+ * @return the most recent power measurement of the given channel.
  */
 struct ina3221_measurement get_measurement(int channel) {
     if (channel >= AMOUNT_OF_CHANNELS) {
         ESP_LOGE(TAG, "Unknown channel: %d", channel);
     }
-
     return measurements[channel];
 }
 
