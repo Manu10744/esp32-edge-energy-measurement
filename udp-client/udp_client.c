@@ -1,28 +1,37 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
-#include <stdlib.h>
+#include <signal.h>
 
 #include "udp_client.h"
 
 #define IP_PROTOCOL 0
 #define RECEIVE_BUFFER_SIZE 1024
 
+static volatile sig_atomic_t listen_for_data = 1;
+
+int sock = 0;
+
 char server_ip[50];
 uint16_t port;
+char channel[2]; 
 
 /**
- * Connects to a UDP server by the given IP address and port.
+ * Communicates with the server identified by the given IP address and port
+ * via UDP protocol.
+ * 
+ * The client initially sends the desired channel ID to the UDP server and starts
+ * to listen for incoming power measurement data.
  * 
  * @param server_ip the IP of the target server.
  * @param port the port of the target server.
  */
-void setup_udp_connection(char server_ip[], uint16_t port) {
-    int sock = 0, valread;
+void start_udp_communication(char server_ip[], uint16_t port) {
+    int rx_data_len;
     struct sockaddr_in serv_addr;
-    char hello_msg[] = "Hello from the Jetson Nano!";
     char rx_buffer[RECEIVE_BUFFER_SIZE] = {0};
 
     serv_addr.sin_family = AF_INET;
@@ -43,27 +52,51 @@ void setup_udp_connection(char server_ip[], uint16_t port) {
         return;
     }
 
-    send(sock, hello_msg, strlen(hello_msg), 0);
-    while (1) {
-        valread = read(sock , rx_buffer, RECEIVE_BUFFER_SIZE);
-        if (valread < 0) {
+    send(sock, channel, strlen(channel), 0);
+
+    while (listen_for_data) {
+        rx_data_len = read(sock, rx_buffer, RECEIVE_BUFFER_SIZE);
+        if (rx_data_len < 0) {
             printf("Error during receiving!");
             break;
         }
 
-        printf("Received %d bytes from %s: %s\n", valread, server_ip, rx_buffer);
+        printf("Received %d bytes from %s: %s\n", rx_data_len, server_ip, rx_buffer);
+        char *eptr;
+        unsigned long long energy_consumption = strtoull(rx_buffer, &eptr, 10);
+
+        printf("Energy Consumption: %llu mAs\n", energy_consumption / 1000000);
     }
+
+    printf("Shutting down socket...\n");
+    shutdown(sock, 0);
+    close(sock);
+}
+
+void handle_sigint(int signal) {
+    listen_for_data = 0;
+    return;
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        printf("\nUsage: %s <server_ip> <server_port> \n", argv[0]);
+    if (argc != 4) {
+        printf("\nUsage: %s <server_ip> <server_port> <channel>\n", argv[0]);
         return EXIT_FAILURE;
-    } 
+    }
+
+    struct sigaction handler;
+    handler.sa_handler = handle_sigint;
+    handler.sa_flags = 0;
+
+    if (sigaction(SIGINT, &handler, NULL) != 0) {
+        printf("Failed to register the SIGINT handler!\n");
+        return EXIT_FAILURE;
+    }
 
     strcpy(server_ip, argv[1]);
     port = strtoul(argv[2], NULL, 10);
+    strcpy(channel, argv[3]);
 
-    printf("Targeting server on IP %s and port %d!\n", server_ip, port);
-    setup_udp_connection(server_ip, port);
+    printf("Targeting server on IP: %s | Port: %d and requesting data for channel %s!\n", server_ip, port, channel);
+    start_udp_communication(server_ip, port);
 }
