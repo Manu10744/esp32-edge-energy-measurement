@@ -30,6 +30,7 @@ static const char *TAG = "UDP_SERVER";
  * @param taskParams pointer to the task's parameters.
  */
 void start_udp_server(void *task_params) {
+    int server_socket = 0;
     char rx_buffer[RECEIVE_BUFFER_SIZE] = {0};
     char tx_buffer[SEND_BUFFER_SIZE] = {0};
     char addr_str[128];
@@ -52,8 +53,8 @@ void start_udp_server(void *task_params) {
             ip_protocol = IPPROTO_IPV6;
         }
 
-        int sock = socket(addr_family, SOCK_DGRAM, ip_protocol);
-        if (sock < 0) {
+        server_socket = socket(addr_family, SOCK_DGRAM, ip_protocol);
+        if (server_socket < 0) {
             ESP_LOGE(TAG, "Unable to create socket: errno %d", errno);
             break;
         }
@@ -64,14 +65,15 @@ void start_udp_server(void *task_params) {
             // Note that by default IPV6 binds to both protocols, it is must be disabled
             // if both protocols used at the same time (used in CI)
             int opt = 1;
-            setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-            setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &opt, sizeof(opt));
+            setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+            setsockopt(server_socket, IPPROTO_IPV6, IPV6_V6ONLY, &opt, sizeof(opt));
         }
 #endif
 
-        int err = bind(sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+        int err = bind(server_socket, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
         if (err < 0) {
             ESP_LOGE(TAG, "Unable to bind socket: errno %d", errno);
+            break;
         }
         ESP_LOGI(TAG, "Socket successfully bound to port %d", PORT);
 
@@ -79,45 +81,44 @@ void start_udp_server(void *task_params) {
         while (1) {
             struct sockaddr_storage source_addr; // Large enough for both IPv4 or IPv6
             socklen_t socklen = sizeof(source_addr);
-            int rx_data_len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&source_addr, &socklen);
 
+            int rx_data_len = recvfrom(server_socket, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&source_addr, &socklen);
             if (rx_data_len < 0) {
                 // Error occurred during receiving
                 ESP_LOGE(TAG, "recvfrom failed: errno %d", errno);
                 break;
-            } else {
-                // Received a message.
-                if (source_addr.ss_family == PF_INET) {
-                    inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr, addr_str, sizeof(addr_str) - 1);
-                } else if (source_addr.ss_family == PF_INET6) {
-                    inet6_ntoa_r(((struct sockaddr_in6 *)&source_addr)->sin6_addr, addr_str, sizeof(addr_str) - 1);
-                }
-
-                rx_buffer[rx_data_len] = '\0';
-                ESP_LOGI(TAG, "Received %d bytes from %s: %s", rx_data_len, addr_str, rx_buffer);
-
-                int requested_channel = atoi(rx_buffer);
-                ESP_LOGI(TAG, "Client requested channel ID %d.", requested_channel);
-                while (1) {
-                    struct ina3221_measurement measurement = get_measurement(requested_channel - 1);
-                    int tx_data_len = sprintf(tx_buffer, "%llu", measurement.energy_consumption);
-                    tx_buffer[tx_data_len] = '\0';
-
-                    int err = sendto(sock, tx_buffer, tx_data_len, 0, (struct sockaddr *)&source_addr, sizeof(source_addr));
-                    if (err < 0) {
-                        ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
-                        break;
-                    }
-                    vTaskDelay(pdMS_TO_TICKS(SEND_INTERVAL_MS));
-                }
-                break;               
             }
+            
+            if (source_addr.ss_family == PF_INET) {
+                inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr, addr_str, sizeof(addr_str) - 1);
+            } else if (source_addr.ss_family == PF_INET6) {
+                inet6_ntoa_r(((struct sockaddr_in6 *)&source_addr)->sin6_addr, addr_str, sizeof(addr_str) - 1);
+            }
+
+            rx_buffer[rx_data_len] = '\0';
+            ESP_LOGI(TAG, "Received %d bytes from %s: %s", rx_data_len, addr_str, rx_buffer);
+
+            int requested_channel = atoi(rx_buffer);
+            ESP_LOGI(TAG, "Client requested channel ID %d.", requested_channel);
+            while (1) {
+                struct ina3221_measurement measurement = get_measurement(requested_channel - 1);
+                int tx_data_len = sprintf(tx_buffer, "%llu", measurement.energy_consumption);
+                tx_buffer[tx_data_len] = '\0';
+
+                int err = sendto(server_socket, tx_buffer, tx_data_len, 0, (struct sockaddr *)&source_addr, sizeof(source_addr));
+                if (err < 0) {
+                    ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
+                    break;
+                }
+                vTaskDelay(pdMS_TO_TICKS(SEND_INTERVAL_MS));
+            }
+            break;               
         }
 
-        if (sock != -1) {
+        if (server_socket != -1) {
             ESP_LOGI(TAG, "Shutting down socket and restarting...");
-            shutdown(sock, 0);
-            close(sock);
+            shutdown(server_socket, 0);
+            close(server_socket);
         }
     }
 
