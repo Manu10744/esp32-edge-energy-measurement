@@ -4,18 +4,26 @@ menu "UDP Server Configuration"
         bool "IPV4"
         default y
         help 
-            Soll IPv4 für den Server benutzt werden?
+            Should IPv4 be used for the UDP server?
 
     config USE_IPV6_STACK
         bool "IPV6"
         default n
         help 
-            Soll IPv6 für den Server genutzt werden?
+            Should IPv6 be used for the UDP server?
         
     config PORT
         int "Port"
         range 0 65535
         default 3333
         help
-            Local port the UDP server will listen on.
+            Port of the UDP server.
+
+    config MAX_CLIENTS
+        int "Maximum amount of clients"
+        range 0 16
+        default 6
+        help
+            Maximum amount of clients that are served.
+            
 endmenu

@@ -1,0 +1,9 @@
+menu "Power Measurement Settings"
+    
+    config AMOUNT_OF_CHANNELS
+        int "Amount of available channels"
+        default 3
+        help 
+            How many INA3221 channels are available?
+
+endmenu
