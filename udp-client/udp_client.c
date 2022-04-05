@@ -11,6 +11,8 @@
 #define IP_PROTOCOL 0
 #define RECEIVE_BUFFER_SIZE 1024
 
+void handle_recv(char data[]);
+
 static volatile sig_atomic_t listen_for_data = 1;
 
 int sock = 0;
@@ -62,15 +64,25 @@ void start_udp_communication(char server_ip[], uint16_t port) {
         }
 
         printf("Received %d bytes from %s: %s\n", rx_data_len, server_ip, rx_buffer);
-        char *eptr;
-        unsigned long long energy_consumption = strtoull(rx_buffer, &eptr, 10);
-
-        printf("Energy Consumption: %llu mAs\n", energy_consumption / 1000000);
+        process_data(rx_buffer);
     }
 
     printf("Shutting down socket...\n");
     shutdown(sock, 0);
     close(sock);
+}
+
+/**
+ * Processes the datagrams representing the power measurements received by 
+ * the UDP server.
+ * 
+ * @param rx_data the received data that should be processed.
+ */
+void process_data(char rx_data[]) {
+    char *eptr;
+    unsigned long long energy_consumption = strtoull(rx_data, &eptr, 10);
+
+    printf("Energy Consumption: %llu mAs\n", energy_consumption / 1000000);
 }
 
 void handle_sigint(int signal) {
