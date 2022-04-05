@@ -11,11 +11,9 @@
 #define IP_PROTOCOL 0
 #define RECEIVE_BUFFER_SIZE 1024
 
-void handle_recv(char data[]);
+void process_data(char rx_data[]);
 
 static volatile sig_atomic_t listen_for_data = 1;
-
-int sock = 0;
 
 char server_ip[50];
 uint16_t port;
@@ -32,32 +30,31 @@ char channel[2];
  * @param port the port of the target server.
  */
 void start_udp_communication(char server_ip[], uint16_t port) {
+    int client_socket = 0;
     int rx_data_len;
-    struct sockaddr_in serv_addr;
     char rx_buffer[RECEIVE_BUFFER_SIZE] = {0};
+    struct sockaddr_in serv_addr;
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(port);   
 
-    if ((sock = socket(AF_INET, SOCK_DGRAM, IP_PROTOCOL)) < 0) {
+    if ((client_socket = socket(AF_INET, SOCK_DGRAM, IP_PROTOCOL)) < 0) {
         printf("\nCould not create socket!\n");
         return;
     }
-
     if (inet_pton(AF_INET, server_ip, &serv_addr.sin_addr) <= 0) {
         printf("\nThe address %s is either invalid or not supported!\n", server_ip);
         return;
     }
-
-    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    if (connect(client_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         printf("\nConnection failed!\n");
         return;
     }
-
-    send(sock, channel, strlen(channel), 0);
+    
+    send(client_socket, channel, strlen(channel), 0);
 
     while (listen_for_data) {
-        rx_data_len = read(sock, rx_buffer, RECEIVE_BUFFER_SIZE);
+        rx_data_len = read(client_socket, rx_buffer, RECEIVE_BUFFER_SIZE);
         if (rx_data_len < 0) {
             printf("Error during receiving!");
             break;
@@ -68,8 +65,8 @@ void start_udp_communication(char server_ip[], uint16_t port) {
     }
 
     printf("Shutting down socket...\n");
-    shutdown(sock, 0);
-    close(sock);
+    shutdown(client_socket, 0);
+    close(client_socket);
 }
 
 /**
