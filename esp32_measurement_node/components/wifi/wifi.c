@@ -17,7 +17,7 @@
 
 #elif CONFIG_USE_INSTITUTE_WIFI_SETTINGS
 #define WIFI_SSID "CAPS"
-#define WIFI_PASS "caps!schulz-wifi"
+#define WIFI_PASSWORD "caps!schulz-wifi"
 #endif
 
 #define WIFI_CONNECT_MAXIMUM_RETRIES 3
