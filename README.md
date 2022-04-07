@@ -34,7 +34,6 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 ### TO-DOs
 - [x] Setup UDP connection between ESP32 and Jetson Nano
 - [x] Send energy measurements to the Jetson Nano
-- [ ] Store received energy measurements on the Jetson Nano
 - [x] Install Grafana & Prometheus on local k8s
 - [x] Write custom prometheus exporter for the power measurements so prometheus is able to poll the data - use sample data until later
 - [x] Test custom prometheus exporter in test k8s
@@ -45,3 +44,5 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - [x] Adjust code in UDP server to send the correct power measurements to multiple connected clients / devices
 - [x] Expand the hardware setup to 1x Jetson Nano + 1x ESP32 and make sure it works
 - [ ] Deploy the exporter for the ESP32 and expand the grafana dashboard with a panel for the ESP32 exporter (-> Setup: 2x exporters / 2 panels in grafana)
+- [ ] (UDP client) Send the current as well, not just the consumed energy
+- [ ] Adjust UDP server and UDP client to use the directory service providing info about the measurement node's IP
