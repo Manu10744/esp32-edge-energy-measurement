@@ -20,7 +20,7 @@
 #define WIFI_PASSWORD "caps!schulz-wifi"
 #endif
 
-#define WIFI_CONNECT_MAXIMUM_RETRIES 3
+#define WIFI_MAX_RETRIES CONFIG_WIFI_MAX_RETRIES
 
 static const char *TAG = "WIFI";
 
@@ -31,23 +31,23 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_CONNECTED_BIT BIT0 // connected to the AP with an IP
 #define WIFI_FAIL_BIT      BIT1 // failed to connect
 
-static int s_retry_num = 0;
+static int retry_counter = 0;
 
 static void event_handler(void* arg, esp_event_base_t event_base,
                           int32_t event_id, void* event_data) {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        if (s_retry_num < WIFI_CONNECT_MAXIMUM_RETRIES) {
+        if (retry_counter < WIFI_MAX_RETRIES) {
             esp_wifi_connect();
-            s_retry_num++;
+            retry_counter++;
             ESP_LOGW(TAG, "Retrying to connect to the AP ...");
         } else {
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
         }
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        s_retry_num = 0;
+        retry_counter = 0;
 
         ESP_LOGI(TAG, "Connection successful, got assigned an IP: " IPSTR, IP2STR(&event->ip_info.ip));
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);

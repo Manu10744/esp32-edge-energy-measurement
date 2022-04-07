@@ -48,8 +48,8 @@ void init_ina3221(void) {
 }
 
 /**
- * Executes a INA3221 power measurement for the given INA3221channel and returns
- * the data related to this measurement.
+ * Executes a power measurement for the given INA3221 channel and returns
+ * the structure representing the new measurement.
  * 
  * @param channel index of the channel that is measured.
  * @return the new power measurement of the given channel.
@@ -72,7 +72,7 @@ struct ina3221_measurement exec_measurement(int channel) {
 }
 
 /**
- * Returns the current power measurement for the given INA3221 channel.
+ * Returns the most recent power measurement of the given INA3221 channel.
  * 
  * @param channel index of the channel that is measured.
  * @return the most recent power measurement of the given channel.
@@ -103,9 +103,10 @@ void init_measurements() {
  * This function should be handed to xTaskCreate() in order to start the power
  * measurements in a dedicated task.
  * 
- * @param task_params pointer to the task's parameters.
+ * @param task_param pointer to the task's parameters. In this case, no parameter
+ *                   is required.
  */
-void start_power_measurements(void *task_params) {
+void start_power_measurements(void *task_param) {
     init_ina3221();
     init_measurements();
 

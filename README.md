@@ -18,9 +18,10 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - `udp_client`: Contains the source code for the UDP client that can be used at the edge devices.
 - `esp32_measurement_node`: Contains the source code for the ESP32 powermeter that measures the power consumption and sends them to the edge devices via UDP communication.
 - `functions`: Contains the serverless function(s) to apply for tests.
+- `prometheus-exporter`: Contains the resources for the prometheus exporter exposing the power consumption metrics.
 
 #### Test utils
-- `test-utils`: scripts and utilities to test functionality.
+- `test-utils`: scripts and utilities to test functionality, especially the resources needed for a local kubernetes cluster needed for testing.
 
 #
 
@@ -44,5 +45,5 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - [x] Adjust code in UDP server to send the correct power measurements to multiple connected clients / devices
 - [x] Expand the hardware setup to 1x Jetson Nano + 1x ESP32 and make sure it works
 - [ ] Deploy the exporter for the ESP32 and expand the grafana dashboard with a panel for the ESP32 exporter (-> Setup: 2x exporters / 2 panels in grafana)
-- [ ] (UDP client) Send the current as well, not just the consumed energy
-- [ ] Adjust UDP server and UDP client to use the directory service providing info about the measurement node's IP
+- [ ] (UDP server) Send the current as well, not just the consumed energy
+- [ ] Adjust UDP server and UDP client code to use the directory service providing info about the measurement node's IP

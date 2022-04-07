@@ -2,7 +2,7 @@
 #define __POWER_MEASUREMENT_H__
 
 /**
- * Contains the data related to a power consumption measurement 
+ * Structure that contains the data related to a power consumption measurement
  * of one specific channel.
  * 
  *  - timestamp              timestamp of the measurement in microseconds.
@@ -14,6 +14,6 @@ struct ina3221_measurement {
 };
 
 struct ina3221_measurement get_measurement(int channel);
-void start_power_measurements(void *task_params);
+void start_power_measurements(void *task_param);
 
 #endif

@@ -1,5 +1,11 @@
-# ESP32 & INA3221
-This contains the code for the ESP32 powermeter which is used to measure the power consumption of the edge devices connected to its INA3221 sensor.
+# ESP32 Power Measurement Node
+This module contains the code for the ESP32 powermeter which utilizes INA3221 sensors that measure the power consumption
+of edge devices connected to one of the sensor's channels.<br>
+After connecting to a network via WiFi, a UDP server is set up in the background which accepts channel subscription requests by clients in order to send the power measurements to the appropriate edge devices.
+
+#### Additional Project Configuration
+The `menuconfig` offers the possibility to adjust the configuration regarding the WiFi connection, the UDP server and the power measurements.
+
 
 ### Configuration & Usage
 1. (Optional) Configure the project

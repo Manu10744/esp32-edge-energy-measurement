@@ -12,4 +12,10 @@ menu "WiFi Connection Settings"
 
     endchoice
 
+    config WIFI_MAX_RETRIES
+        int "Maximum amount of connection retries"
+        range 0 10
+        default 3
+        help
+            How many connection retries should be executed?
 endmenu

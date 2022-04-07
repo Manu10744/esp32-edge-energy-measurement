@@ -49,13 +49,13 @@ int server_socket = 0;
  * This function should be handed to xTaskCreate() in order to start the UDP server 
  * in a dedicated task.
  * 
- * @param taskParams pointer to the task's parameters. This must be a pointer to either
+ * @param taskParams pointer to the task's parameter. This must be a pointer to either
  *                   AF_INET or AF_INET6.
  */
-void start_udp_server(void *task_params) {
+void start_udp_server(void *task_param) {
     char rx_buffer[RECEIVE_BUFFER_SIZE] = {0};
     char addr_str[128];
-    int addr_family = (int)task_params;
+    int addr_family = (int)task_param;
     int ip_protocol = 0;
     struct sockaddr_in6 server_addr;
     size_t accepted_clients = 0;
@@ -146,7 +146,8 @@ void start_udp_server(void *task_params) {
 }
 
 /**
- * Validates a power measurement subscription request received from a client. 
+ * Validates a power measurement subscription request received from a client UDP 
+ * message. 
  * 
  * In order to be valid, the request data must be a string representing a valid
  * INA3221 channel - meaning that it must be successfully converted to an integer
@@ -189,9 +190,9 @@ static bool validate_request(char received_data[]) {
  * This function should be handed to xTaskCreate() in order to handle the transmission
  * of power measurements to the client in a dedicated task.
  * 
- * @param task_params the channel ID that was requested by the client. This must be
- *                    a pointer to the structure (struct client_info) representing the 
- *                    client being served.
+ * @param task_param pointer to the task's parameter. This must be a pointer to the 
+ *                   structure (struct client_info) representing the information 
+ *                   about the client being served.
  */
 static void serve_client(void *task_param) {
     char tx_buffer[SEND_BUFFER_SIZE] = {0};
