@@ -45,5 +45,6 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - [x] Adjust code in UDP server to send the correct power measurements to multiple connected clients / devices
 - [x] Expand the hardware setup to 1x Jetson Nano + 1x ESP32 and make sure it works
 - [ ] Deploy the exporter for the ESP32 and expand the grafana dashboard with a panel for the ESP32 exporter (-> Setup: 2x exporters / 2 panels in grafana)
-- [ ] (UDP server) Send the current as well, not just the consumed energy
+- [ ] (UDP server) Send the current as well, not just the consumed energy. => This will require sending structured data. Implement protocolbuffers
+- [ ] UDP client should save the most recent measurement and compute the difference upon receiving new measurement => This way we get more meaningful data in the exporter / prometheus later
 - [ ] Adjust UDP server and UDP client code to use the directory service providing info about the measurement node's IP
