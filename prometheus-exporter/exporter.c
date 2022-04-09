@@ -7,14 +7,18 @@
 #include "prom.h"
 #include "promhttp.h"
 
+#define HTTP_DAEMON_PORT 10100
+
 static volatile sig_atomic_t running = 1;
+
+struct MHD_Daemon *http_daemon;
 
 static void init_exporter() {
     // Initialize the Default registry
     int err = prom_collector_registry_default_init();
     if (err) {
         printf("\nFailed to initialize the default collector registry!\n");
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
     printf("Successfully initialized the default collector registry.\n");
 
@@ -23,16 +27,16 @@ static void init_exporter() {
 
 static void handle_sigint(int signal) {
     prom_collector_registry_destroy(PROM_COLLECTOR_REGISTRY_DEFAULT);
-    MHD_stop_daemon(daemon);
+    MHD_stop_daemon(http_daemon);
     running = 0;
-    return;
 }
 
 int main(int argc, char *argv[]) { 
     init_exporter();
 
-    struct MHD_Daemon *daemon = promhttp_start_daemon(MHD_USE_SELECT_INTERNALLY, 8000, NULL, NULL);
-    if (daemon == NULL) {
+    printf("Starting HTTP daemon on port %d in the background.\n", HTTP_DAEMON_PORT);
+    http_daemon = promhttp_start_daemon(MHD_USE_SELECT_INTERNALLY, HTTP_DAEMON_PORT, NULL, NULL);
+    if (http_daemon == NULL) {
         printf("\nFailed to start the exporter daemon!\n");
         return EXIT_FAILURE;
     }
