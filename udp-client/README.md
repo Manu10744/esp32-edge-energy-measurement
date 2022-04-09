@@ -1,11 +1,11 @@
 # UDP client for edge devices
-This linux-based UDP client can be used on the edge devices in order to connect to the ESP32 powermeter that sends the power consumption measurements.
+This linux-based UDP client can be used on the edge devices in order to connect to the ESP32 powermeter and request the power measurements from a specific INA3221 channel.<br>
+Once the server received the request it will continuously send the power measurements for the edge device connected to the specified channel.
 
-
-### Configuration & Usage
-IP and port of the target UDP server are passed as arguments:
+### Usage
+The required arguments are IP and port of the target UDP server as well as the channel (e.g. `2`) to fetch power measurements from.
 ```bash
-./udp-client <IP> <Port>
+./udp-client <IP> <Port> <INA3221_Channel>
 ```
 
 ### Build

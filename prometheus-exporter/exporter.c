@@ -7,29 +7,14 @@
 #include "prom.h"
 #include "promhttp.h"
 
-#define HTTP_DAEMON_PORT 10100
+#define HTTP_DAEMON_PORT 8000
+
+static void init_exporter();
+static void handle_sigint(int signal);
 
 static volatile sig_atomic_t running = 1;
 
 struct MHD_Daemon *http_daemon;
-
-static void init_exporter() {
-    // Initialize the Default registry
-    int err = prom_collector_registry_default_init();
-    if (err) {
-        printf("\nFailed to initialize the default collector registry!\n");
-        exit(EXIT_FAILURE);
-    }
-    printf("Successfully initialized the default collector registry.\n");
-
-    // TODO: Initalize the metrics
-}
-
-static void handle_sigint(int signal) {
-    prom_collector_registry_destroy(PROM_COLLECTOR_REGISTRY_DEFAULT);
-    MHD_stop_daemon(http_daemon);
-    running = 0;
-}
 
 int main(int argc, char *argv[]) { 
     init_exporter();
@@ -55,4 +40,22 @@ int main(int argc, char *argv[]) {
 
     printf("\nShutting down ...\n");
     return EXIT_SUCCESS;
+}
+
+static void init_exporter() {
+    // Initialize the Default registry
+    int err = prom_collector_registry_default_init();
+    if (err) {
+        printf("\nFailed to initialize the default collector registry!\n");
+        exit(EXIT_FAILURE);
+    }
+    printf("Successfully initialized the default collector registry.\n");
+
+    // TODO: Initalize the metrics
+}
+
+static void handle_sigint(int signal) {
+    prom_collector_registry_destroy(PROM_COLLECTOR_REGISTRY_DEFAULT);
+    MHD_stop_daemon(http_daemon);
+    running = 0;
 }

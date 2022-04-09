@@ -38,6 +38,26 @@ static const char *TAG = "UDP_SERVER";
 
 int server_socket = 0;
 
+void app_main(void) {
+    esp_log_level_set(TAG, ESP_LOG_INFO);
+
+    // Step 1: Establish a WiFi connection
+    connect_to_wifi();
+
+    // Step 2: Start power measurement
+    xTaskCreate(start_power_measurements, "ina3221_power_measurement", configMINIMAL_STACK_SIZE * 8, NULL, 2, NULL);
+
+    // Step 3: Start UDP server and listen for connections
+#ifdef CONFIG_USE_IPV4_STACK
+    ESP_LOGI(TAG, "Using IPv4 stack for UDP server socket!");
+    xTaskCreate(start_udp_server, "udp_server", 4096, (void*)AF_INET, 5, NULL);
+#endif
+#ifdef CONFIG_USE_IPV6_STACK
+    ESP_LOGI(TAG, "Using IPv6 stack for UDP server socket!");
+    xTaskCreate(start_udp_server, "udp_server", 4096, (void*)AF_INET6, 5, NULL);
+#endif 
+}
+
 /**
  * Starts a UDP server using the configured IP stack (IPv4 / IPv6) on the configured 
  * port. The server will restart itself on errors.
@@ -214,24 +234,4 @@ static void serve_client(void *task_param) {
 
     ESP_LOGI(TAG, "Deleting task of client that's subscripted to channel %d", client.requested_channel);
     vTaskDelete(NULL);
-}
-
-void app_main(void) {
-    esp_log_level_set(TAG, ESP_LOG_INFO);
-
-    // Step 1: Establish a WiFi connection
-    connect_to_wifi();
-
-    // Step 2: Start power measurement
-    xTaskCreate(start_power_measurements, "ina3221_power_measurement", configMINIMAL_STACK_SIZE * 8, NULL, 2, NULL);
-
-    // Step 3: Start UDP server and listen for connections
-#ifdef CONFIG_USE_IPV4_STACK
-    ESP_LOGI(TAG, "Using IPv4 stack for UDP server socket!");
-    xTaskCreate(start_udp_server, "udp_server", 4096, (void*)AF_INET, 5, NULL);
-#endif
-#ifdef CONFIG_USE_IPV6_STACK
-    ESP_LOGI(TAG, "Using IPv6 stack for UDP server socket!");
-    xTaskCreate(start_udp_server, "udp_server", 4096, (void*)AF_INET6, 5, NULL);
-#endif 
 }
