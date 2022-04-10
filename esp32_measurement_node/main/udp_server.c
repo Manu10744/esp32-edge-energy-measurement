@@ -14,12 +14,12 @@
 #define PORT CONFIG_PORT
 #define MAX_CLIENTS CONFIG_MAX_CLIENTS
 
-#define RECEIVE_BUFFER_SIZE 128
-#define SEND_BUFFER_SIZE 1024
+#define RECEIVE_BUFFER_SIZE 16
 #define SEND_INTERVAL_MS 1000
 
 static void serve_client(void *task_param);
 static bool validate_request(char received_data[]);
+static void start_udp_server(void *task_param);
 
 /**
  * Structure containing the relevant information about a client connection.
@@ -72,7 +72,7 @@ void app_main(void) {
  * @param taskParams pointer to the task's parameter. This must be a pointer to either
  *                   AF_INET or AF_INET6.
  */
-void start_udp_server(void *task_param) {
+static void start_udp_server(void *task_param) {
     char rx_buffer[RECEIVE_BUFFER_SIZE] = {0};
     char addr_str[128];
     int addr_family = (int)task_param;
@@ -166,6 +166,42 @@ void start_udp_server(void *task_param) {
 }
 
 /**
+ * Handles the serialized transmission of the power measurements retrieved
+ * from the requested INA3221 channel to a specific client.
+ * 
+ * This function should be handed to xTaskCreate() in order to handle the transmission
+ * of power measurements to the client in a dedicated task.
+ * 
+ * @param task_param pointer to the task's parameter. This must be a pointer to the 
+ *                   structure (struct client_info) representing the information 
+ *                   about the client being served.
+ */
+static void serve_client(void *task_param) {
+    struct client_info client = * (struct client_info *)task_param;
+    void *tx_buffer;
+    unsigned tx_data_len;
+
+    ESP_LOGI(TAG, "Starting to serve client requesting channel %d", client.requested_channel);
+    while (1) {
+        PowerMeasurement measurement = get_measurement(client.requested_channel - 1);
+        tx_data_len = power_measurement__get_packed_size(&measurement);
+        tx_buffer = malloc(tx_data_len);
+        power_measurement__pack(&measurement, tx_buffer);
+
+        int err = sendto(server_socket, tx_buffer, tx_data_len, 0, (struct sockaddr *)&client.sockaddr, client.socklen);
+        if (err < 0) {
+            ESP_LOGE(TAG, "Error occurred during sending to client requesting channel %d: errno %d", errno, client.requested_channel);
+            break;
+        }
+        vTaskDelay(pdMS_TO_TICKS(SEND_INTERVAL_MS));
+    }
+
+    ESP_LOGI(TAG, "Deleting task of client that's subscripted to channel %d", client.requested_channel);
+    free(tx_buffer);
+    vTaskDelete(NULL);
+}
+
+/**
  * Validates a power measurement subscription request received from a client UDP 
  * message. 
  * 
@@ -201,37 +237,4 @@ static bool validate_request(char received_data[]) {
     }
 
     return errno == 0 && received_data && !*endptr;
-}
-
-/**
- * Handles the transmission of the power measurements retrieved from the requested
- * INA3221 channel to a specific client.
- * 
- * This function should be handed to xTaskCreate() in order to handle the transmission
- * of power measurements to the client in a dedicated task.
- * 
- * @param task_param pointer to the task's parameter. This must be a pointer to the 
- *                   structure (struct client_info) representing the information 
- *                   about the client being served.
- */
-static void serve_client(void *task_param) {
-    char tx_buffer[SEND_BUFFER_SIZE] = {0};
-    struct client_info client = * (struct client_info *)task_param;
-
-    ESP_LOGI(TAG, "Starting to serve client requesting channel %d", client.requested_channel);
-    while (1) {
-        struct ina3221_measurement measurement = get_measurement(client.requested_channel - 1);
-        int tx_data_len = sprintf(tx_buffer, "%llu", measurement.energy_consumption);
-        tx_buffer[tx_data_len] = '\0';
-
-        int err = sendto(server_socket, tx_buffer, tx_data_len, 0, (struct sockaddr *)&client.sockaddr, client.socklen);
-        if (err < 0) {
-            ESP_LOGE(TAG, "Error occurred during sending to client requesting channel %d: errno %d", errno, client.requested_channel);
-            break;
-        }
-        vTaskDelay(pdMS_TO_TICKS(SEND_INTERVAL_MS));
-    }
-
-    ESP_LOGI(TAG, "Deleting task of client that's subscripted to channel %d", client.requested_channel);
-    vTaskDelete(NULL);
 }

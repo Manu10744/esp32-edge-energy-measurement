@@ -25,12 +25,12 @@ static ina3221_t dev = {
     .mask.mask_register = INA3221_DEFAULT_MASK
 };
 
-struct ina3221_measurement measurements[AMOUNT_OF_CHANNELS];
+PowerMeasurement measurements[AMOUNT_OF_CHANNELS];
 
 /*
  * Initializes the INA3221 power measurement sensor.
  */
-void init_ina3221(void) {
+static void init_ina3221(void) {
     ESP_LOGI(TAG, "Initializing INA3221 ...");
     memset(&dev.i2c_dev, 0, sizeof(i2c_dev_t));
 
@@ -54,16 +54,17 @@ void init_ina3221(void) {
  * @param channel index of the channel that is measured.
  * @return the new power measurement of the given channel.
  */
-struct ina3221_measurement exec_measurement(int channel) {
+static PowerMeasurement exec_measurement(int channel) {
     ESP_ERROR_CHECK(ina3221_get_status(&dev)); // get mask
 
-    struct ina3221_measurement prev_measurement = measurements[channel];
-    struct ina3221_measurement new_measurement;
+    PowerMeasurement prev_measurement = measurements[channel];
+    PowerMeasurement new_measurement = POWER_MEASUREMENT__INIT;
     float shunt_current;
     float voltage;
 
     ESP_ERROR_CHECK(ina3221_get_shunt_value(&dev, channel, &voltage, &shunt_current));
     new_measurement.timestamp = esp_timer_get_time();
+    new_measurement.current = shunt_current;
 
     uint64_t elapsed_microseconds = new_measurement.timestamp - prev_measurement.timestamp;
     new_measurement.energy_consumption = prev_measurement.energy_consumption + (shunt_current * elapsed_microseconds);
@@ -77,7 +78,7 @@ struct ina3221_measurement exec_measurement(int channel) {
  * @param channel index of the channel that is measured.
  * @return the most recent power measurement of the given channel.
  */
-struct ina3221_measurement get_measurement(int channel) {
+PowerMeasurement get_measurement(int channel) {
     if (channel >= AMOUNT_OF_CHANNELS) {
         ESP_LOGE(TAG, "Unknown channel: %d", channel);
     }
@@ -87,11 +88,10 @@ struct ina3221_measurement get_measurement(int channel) {
 /**
  * Initializes the measurements for each INA3221 channel.
  */
-void init_measurements() {
+static void init_measurements() {
     for (int channel = 0; channel < AMOUNT_OF_CHANNELS; channel++) {
-        struct ina3221_measurement init_measurement;
+        PowerMeasurement init_measurement = POWER_MEASUREMENT__INIT;
         init_measurement.timestamp = esp_timer_get_time();
-        init_measurement.energy_consumption = 0;
 
         measurements[channel] = init_measurement;
     }

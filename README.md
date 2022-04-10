@@ -8,20 +8,20 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 <img src="./img/hardware_setup.jpg" height="350px" width="300px">
 
 - `INA3221`: the power measurement sensor with three channels
-- `ESP32`: the microcontroller where the main software runs
-- `SSD1306`: display that can optionally be used to display power measurements.
-
+- `ESP32 Power Measurement Node`: the microcontroller where the main software runs
+- `Jetson Nano` / `ESP32`: sample edge devices, connected to INA3221.
 <br>
 
 ### Table of Contents
 #### Main components
 - `udp_client`: Contains the source code for the UDP client that can be used at the edge devices.
 - `esp32_measurement_node`: Contains the source code for the ESP32 powermeter that measures the power consumption and sends them to the edge devices via UDP communication.
-- `functions`: Contains the serverless function(s) to apply for tests.
 - `prometheus-exporter`: Contains the resources for the prometheus exporter exposing the power consumption metrics.
+- `protobuffers`: Contains the protocolbuffer messages that are used for data transmission between the individual components over the network.
 
 #### Test utils
 - `test-utils`: scripts and utilities to test functionality, especially the resources needed for a local kubernetes cluster needed for testing.
+- `functions`: Contains the serverless function(s) to apply for tests.
 
 #
 

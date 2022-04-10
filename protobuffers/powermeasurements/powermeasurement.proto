@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+/*
+ * Structure that contains the data related to a power consumption measurement
+ * of one specific INA3221 channel.
+ * 
+ *  - timestamp              timestamp of the measurement, given in microseconds. This timestamp is
+                             NOT based on UNIX epoch time, but on the elapsed time since start-up of 
+                             the ESP32 power measurement node.
+ *  - energy_consumption     total power consumption at the time of measurement, given in nAs.
+ *  - current                the current at the time of measurement, given in mA.
+ */
+message power_measurement {
+    uint64 timestamp = 1;
+    uint64 energy_consumption = 2;
+    float current = 3;
+}
+
