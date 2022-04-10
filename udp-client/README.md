@@ -11,5 +11,5 @@ The required arguments are IP and port of the target UDP server as well as the c
 ### Build
 Build with `gcc` on a linux system.
 ```bash
-gcc -fdiagnostics-color=always -g udp_client.c -o ./udp_client
+gcc -g -I/usr/include udp_client.c  ../protobuffers/powermeasurements/powermeasurement.pb-c.c -o udp_client -L/usr/lib -lprotobuf-c
 ```

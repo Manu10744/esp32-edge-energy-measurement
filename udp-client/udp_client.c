@@ -6,14 +6,17 @@
 #include <string.h>
 #include <signal.h>
 
+#include <protobuf-c/protobuf-c.h>
+
 #include "udp_client.h"
+#include "../protobuffers/powermeasurements/powermeasurement.pb-c.h"
 
 #define IP_PROTOCOL 0
 #define RECEIVE_BUFFER_SIZE 1024
 #define SEND_BUFFER_SIZE 16
 
 static void handle_sigint(int signal);
-static void process_data(char rx_data[]);
+static void process_data(char rx_data[], int len);
 static void shutdown_sock(int sock);
 
 static volatile sig_atomic_t listen_for_data = 1; 
@@ -90,8 +93,8 @@ void start_udp_communication(char server_ip[], uint16_t port, uint8_t requested_
             break;
         }
 
-        printf("Received %d bytes from %s: %s\n", rx_data_len, server_ip, rx_buffer);
-        process_data(rx_buffer);
+        printf("Received %d bytes from %s\n", rx_data_len, server_ip);
+        process_data(rx_buffer, rx_data_len);
     }
 
     shutdown_sock(client_socket);
@@ -103,11 +106,16 @@ void start_udp_communication(char server_ip[], uint16_t port, uint8_t requested_
  * 
  * @param rx_data the received data that should be processed.
  */
-static void process_data(char rx_data[]) {
-    char *eptr;
-    unsigned long long energy_consumption = strtoull(rx_data, &eptr, 10);
+static void process_data(char rx_data[], int len) {
+    PowerMeasurement *measurement = power_measurement__unpack(NULL, len, rx_data);
+    if (measurement == NULL) {
+        printf("Failed to deserialize the received data!\n");
+        exit(EXIT_FAILURE);
+    }
 
-    printf("Energy Consumption: %llu mAs\n", energy_consumption / 1000000);
+    printf("\nTimestamp: %lu \nEnergy Consumption: %lu mAs \nCurrent: %f mA\n\n", 
+            measurement->timestamp, measurement->energy_consumption / 1000000, measurement->current);
+    power_measurement__free_unpacked(measurement, NULL);
 }
 
 static void handle_sigint(int signal) {
