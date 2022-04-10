@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: monitoring
+  name: prometheus-power-collector-deployment
+  labels:
+    app: prometheus-power-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-power-collector
+  template:
+    metadata:
+      labels:
+        app: prometheus-power-collector
+    spec:
+      containers:
+      - name: prometheus-power-collector
+        image: phyz1x/power-prometheus-exporter:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000

@@ -14,9 +14,9 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 
 ### Table of Contents
 #### Main components
-- `udp_client`: Contains the source code for the UDP client that can be used at the edge devices.
-- `esp32_measurement_node`: Contains the source code for the ESP32 powermeter that measures the power consumption and sends them to the edge devices via UDP communication.
-- `prometheus-exporter`: Contains the resources for the prometheus exporter exposing the power consumption metrics.
+- `esp32-measurement-node`: Contains the source code for the ESP32 powermeter that measures the power consumption and sends them to the edge devices via UDP communication.
+- `udp_client`: Contains the source code for the UDP client that can be used at the edge devices in order to fetch power measurements from the ESP32 powermeter.
+- `prometheus-power-exporter`: Contains the resources for the prometheus exporter exposing the power consumption metrics.
 - `protobuffers`: Contains the protocolbuffer messages that are used for data transmission between the individual components over the network.
 
 #### Test utils
@@ -48,7 +48,7 @@ The power consumption measurements are carried out by a ESP32 powermeter.
   - Metric 1: total energy consumption (= counter)
   - Metric 2: energy consumption compared to last measurement (= gauge)
 - [ ] Deploy the exporter for the ESP32 and expand the grafana dashboard with a panel for the ESP32 exporter 
-  - Goal: 2 running exporters, 2 panels in grafana
+  - Goal: 2 running exporters exposing the real data, 2 panels in grafana visualizing it
 - [x] Send the measured current to the client as well, not just the consumed energy. 
   - This will require sending structured data => Implement protocolbuffers
 - [ ] [__UDP CLIENT__] Use the directory service providing info about the measurement node's IP
