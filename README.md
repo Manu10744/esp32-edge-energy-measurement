@@ -38,13 +38,17 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - [x] Install Grafana & Prometheus on local k8s
 - [x] Write custom prometheus exporter for the power measurements so prometheus is able to poll the data - use sample data until later
 - [x] Test custom prometheus exporter in test k8s
-- [ ] Adjust prometheus exporter so it exposes the power measurements to prometheus instead of sample data
 - [x] Adjust code in powermeasurement component to measure power consumption of multiple devices (multiple channels)
 - [ ] Adjust code to make it possible to use more than 1x INA3221 (-> project configuration).
 - [x] Make UDP client send a certain channel ID to demand the power measurements for it instead of hardcoding channel 3 
 - [x] Adjust code in UDP server to send the correct power measurements to multiple connected clients / devices
 - [x] Expand the hardware setup to 1x Jetson Nano + 1x ESP32 and make sure it works
-- [ ] Deploy the exporter for the ESP32 and expand the grafana dashboard with a panel for the ESP32 exporter (-> Setup: 2x exporters / 2 panels in grafana)
-- [x] Send the measured current to the client as well, not just the consumed energy. => This will require sending structured data. Implement protocolbuffers
-- [ ] UDP client should save the most recent measurement and compute the difference upon receiving new measurement => This way we get more meaningful data in the exporter / prometheus later
-- [ ] Adjust UDP server and UDP client code to use the directory service providing info about the measurement node's IP
+- [ ] [__UDP CLIENT__] Make UDP client compute the energy consumption difference from last received measurement upon receiving new measurement
+- [ ] Make prometheus exporter expose the real power measurement data instead of fake data -> start with 2 simple metrics:
+  - Metric 1: total energy consumption (= counter)
+  - Metric 2: energy consumption compared to last measurement (= gauge)
+- [ ] Deploy the exporter for the ESP32 and expand the grafana dashboard with a panel for the ESP32 exporter 
+  - Goal: 2 running exporters, 2 panels in grafana
+- [x] Send the measured current to the client as well, not just the consumed energy. 
+  - This will require sending structured data => Implement protocolbuffers
+- [ ] [__UDP CLIENT__] Use the directory service providing info about the measurement node's IP
