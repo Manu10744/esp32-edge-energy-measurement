@@ -2,14 +2,14 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: monitoring
-  name: prometheus-power-collector-service
+  name: prometheus-power-exporter-service
   labels:
-    app: prometheus-power-collector
+    app: prometheus-power-exporter
   annotations:
     prometheus.io/scrape: 'true'
 spec:
   selector:
-    app: prometheus-power-collector
+    app: prometheus-power-exporter
   type: NodePort
   ports:
   - name: http
