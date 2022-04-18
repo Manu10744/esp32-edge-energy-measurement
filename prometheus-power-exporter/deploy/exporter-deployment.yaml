@@ -17,7 +17,12 @@ spec:
     spec:
       containers:
       - name: prometheus-power-exporter
-        image: phyz1x/power-prometheus-exporter:latest
-        imagePullPolicy: IfNotPresent
+        image: phyz1x/prometheus-power-exporter:latest
+        env:
+          - name: DEVICE_UDP_IP
+            value: 127.0.0.1
+          - name: DEVICE_UDP_PORT
+            value: 5000
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000

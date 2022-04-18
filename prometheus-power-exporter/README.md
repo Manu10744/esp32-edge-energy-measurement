@@ -53,3 +53,17 @@ export DEVICE_UDP_IP="<UDP_IP>"
 export DEVICE_UDP_PORT="<UDP_PORT>"
 ./exporter 
 ```
+
+### Docker
+
+- Build the Docker Image:
+```bash
+cp exporter docker
+docker build -t phyz1x/prom-power-exporter:latest .
+rm exporter
+```
+
+- Run the Docker Image:
+```bash
+docker run --name prometheus-power-exporter -e DEVICE_UDP_IP=127.0.0.1 -e DEVICE_UDP_PORT=5000 phyz1x/prometheus-power-exporter:latest
+```
