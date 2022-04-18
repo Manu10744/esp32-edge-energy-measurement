@@ -5,6 +5,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <string.h>
+#include <errno.h>
 
 #include "microhttpd.h"
 #include "prom.h"
@@ -117,6 +119,13 @@ static void fetch_data(void *args) {
         close(dev_communication_socket);
         exit(EXIT_FAILURE);
     }
+
+    struct timeval read_timeout;
+    read_timeout.tv_sec = 0;
+    read_timeout.tv_usec = 500000; // 500ms
+    if (setsockopt(dev_communication_socket, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof(read_timeout)) < 0) {
+        perror("Failed to set the socket read timeout!\n");
+    }
         
     printf("Starting to fetch data from monitored device via UDP (IP: %s | Port: %d)\n", dev_addr->ip, dev_addr->port);
     while (1) {
@@ -124,21 +133,20 @@ static void fetch_data(void *args) {
 
         int rx_data_len = read(dev_communication_socket, rx_buffer, RECEIVE_BUFFER_SIZE);
         if (rx_data_len < 0) {
-            printf("Error during receiving UDP packets from the monitored device!\n");
-            exit(EXIT_FAILURE);
+            printf("Failed to receive data from the monitored device: %s\n", strerror(errno));
+        } else {
+            PowerMeasurement *measurement = power_measurement__unpack(NULL, rx_data_len, rx_buffer);
+            if (measurement == NULL) {
+                printf("Failed to deserialize the received data!\n");
+            } else {
+                printf("\nTimestamp: %lu \nEnergy Consumption: %lu mAs \nCurrent: %f mA\n\n", 
+                       measurement->timestamp, measurement->energy_consumption, measurement->current);
+
+                power_measurement__free_unpacked(measurement, NULL);
+                update_power_metrics(*measurement);
+            }
         }
 
-        PowerMeasurement *measurement = power_measurement__unpack(NULL, rx_data_len, rx_buffer);
-        if (measurement == NULL) {
-            printf("Failed to deserialize the data received from the monitored device!\n");
-            exit(EXIT_FAILURE);
-        }
-
-        printf("\nTimestamp: %lu \nEnergy Consumption: %lu mAs \nCurrent: %f mA\n\n", 
-                measurement->timestamp, measurement->energy_consumption, measurement->current);
-        power_measurement__free_unpacked(measurement, NULL);
-
-        update_power_metrics(*measurement);
         sleep(DEVICE_DATA_FETCH_INTERVAL_SECONDS);
     }
 }
