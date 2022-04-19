@@ -120,13 +120,13 @@ data:
       evaluation_interval: 5s
 
       external_labels:
-        monitor: 'prometheus-power-collector'
+        monitor: 'power-exporter'
 
     rule_files:
       - /etc/prometheus/prometheus.rules
 
     scrape_configs:
-      - job_name: 'prometheus-power-collector'
+      - job_name: 'power-exporter'
         scrape_interval: 15s
 
         metrics_path: /metrics
@@ -141,7 +141,7 @@ data:
         relabel_configs:
         - source_labels: [__meta_kubernetes_service_label_app]
           separator: ;
-          regex: prometheus-power-collector
+          regex: power-exporter
           replacement: $1
           action: keep
         - source_labels: [__meta_kubernetes_endpoint_port_name]
