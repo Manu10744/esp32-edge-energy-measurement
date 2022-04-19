@@ -31,9 +31,17 @@ void init_power_metrics(void) {
     current_gauge = prom_collector_registry_must_register_metric(prom_gauge_new(METRIC_NAME_CURRENT, METRIC_DESC_CURRENT, 0, NULL));
 }
 
+/**
+ * Updates the metrics using the given power measurment.
+ * 
+ * The power consumption and eletrical current are transformed from mAs to As
+ * and mA to A, respectively.
+ * 
+ * @param measurement the most recent power measurement to update the metrics with.
+ */
 void update_power_metrics(PowerMeasurement measurement) {
-    prom_gauge_set(current_gauge, measurement.current, NULL);
-    prom_counter_increment_to(&consumption_counter_wrapper, (double) measurement.energy_consumption);
+    prom_gauge_set(current_gauge, measurement.current / 1000, NULL);
+    prom_counter_increment_to(&consumption_counter_wrapper, measurement.energy_consumption / 1000);
 }
 
 /**
