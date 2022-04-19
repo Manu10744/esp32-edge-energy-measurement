@@ -70,7 +70,7 @@ static const ProtobufCFieldDescriptor power_measurement__field_descriptors[3] =
     "energy_consumption",
     2,
     PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_UINT64,
+    PROTOBUF_C_TYPE_DOUBLE,
     0,   /* quantifier_offset */
     offsetof(PowerMeasurement, energy_consumption),
     NULL,

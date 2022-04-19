@@ -59,15 +59,15 @@ static PowerMeasurement exec_measurement(int channel) {
 
     PowerMeasurement prev_measurement = measurements[channel];
     PowerMeasurement new_measurement = POWER_MEASUREMENT__INIT;
+
     float shunt_current;
     float voltage;
-
     ESP_ERROR_CHECK(ina3221_get_shunt_value(&dev, channel, &voltage, &shunt_current));
     new_measurement.timestamp = esp_timer_get_time();
     new_measurement.current = shunt_current;
 
-    uint64_t elapsed_microseconds = new_measurement.timestamp - prev_measurement.timestamp;
-    new_measurement.energy_consumption = prev_measurement.energy_consumption + (shunt_current * elapsed_microseconds);
+    float elapsed_seconds = (new_measurement.timestamp - prev_measurement.timestamp) * 1.0 / 1000000;
+    new_measurement.energy_consumption = prev_measurement.energy_consumption + (shunt_current * elapsed_seconds);
     
     return new_measurement;
 }

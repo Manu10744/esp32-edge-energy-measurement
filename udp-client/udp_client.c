@@ -6,6 +6,8 @@
 #include <string.h>
 #include <signal.h>
 #include <pthread.h>
+#include <string.h>
+#include <errno.h>
 
 #include <protobuf-c/protobuf-c.h>
 
@@ -78,11 +80,11 @@ void fetch_power_measurements(char server_ip[], uint16_t port, uint8_t requested
         exit(EXIT_FAILURE);
     }
     if ((client_socket = socket(AF_INET, SOCK_DGRAM, IP_PROTOCOL)) < 0) {
-        printf("\nCould not create socket!\n");
+        printf("\nCould not create socket: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
     if (connect(client_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        printf("\nConnection failed!\n");
+        printf("\nConnection failed: %s\n", strerror(errno));
         shutdown_sock(client_socket);
         exit(EXIT_FAILURE);
     }
@@ -106,8 +108,8 @@ void fetch_power_measurements(char server_ip[], uint16_t port, uint8_t requested
         latest_measurement = *measurement;
         power_measurement__free_unpacked(measurement, NULL);
 
-        printf("\nTimestamp: %lu \nEnergy Consumption: %lu mAs \nCurrent: %f mA\n\n", 
-            latest_measurement.timestamp, latest_measurement.energy_consumption / 1000000, latest_measurement.current);
+        printf("\nTimestamp: %lu \nEnergy Consumption: %lf mAs \nCurrent: %f mA\n\n", 
+            latest_measurement.timestamp, latest_measurement.energy_consumption, latest_measurement.current);
     }
 
     shutdown_sock(client_socket);

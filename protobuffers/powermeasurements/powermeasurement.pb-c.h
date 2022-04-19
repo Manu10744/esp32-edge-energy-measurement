@@ -24,20 +24,20 @@ typedef struct PowerMeasurement PowerMeasurement;
 /* --- messages --- */
 
 /*
- * Structure that contains the data related to a power consumption measurement
- * of one specific INA3221 channel.
+ * Structure that contains the data representing a power consumption measurement
+ * of a specific device, measured by the ESP32 powermeter.
  * 
  *  - timestamp              timestamp of the measurement, given in microseconds. This timestamp is
  *NOT based on UNIX epoch time, but on the elapsed time since start-up of 
  *the ESP32 power measurement node.
- *  - energy_consumption     total power consumption at the time of measurement, given in nAs.
- *  - current                the current at the time of measurement, given in mA.
+ *  - energy_consumption     total power consumption at the time of measurement, given in mAs.
+ *  - current                the electrical current at the time of measurement, given in mA.
  */
 struct  PowerMeasurement
 {
   ProtobufCMessage base;
   uint64_t timestamp;
-  uint64_t energy_consumption;
+  double energy_consumption;
   float current;
 };
 #define POWER_MEASUREMENT__INIT \

@@ -190,7 +190,7 @@ static void serve_client(void *task_param) {
 
         int err = sendto(server_socket, tx_buffer, tx_data_len, 0, (struct sockaddr *)&client.sockaddr, client.socklen);
         if (err < 0) {
-            ESP_LOGE(TAG, "Error occurred during sending to client requesting channel %d: errno %d", errno, client.requested_channel);
+            ESP_LOGE(TAG, "Error occurred during sending data to client requesting channel %d: errno %d", errno, client.requested_channel);
             break;
         }
         vTaskDelay(pdMS_TO_TICKS(SEND_INTERVAL_MS));
