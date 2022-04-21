@@ -7,7 +7,7 @@ RUN apt-get update && \
     ldconfig
 
 RUN useradd --no-log-init --create-home --shell /bin/bash udp-client
-USER udp-client 
+COPY --chown=udp-client:udp-client udp_client .
 
-COPY udp_client .
+USER udp-client 
 CMD ./udp_client
