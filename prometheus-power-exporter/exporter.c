@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
     handler.sa_handler = handle_sigint;
     handler.sa_flags = 0;
     if (sigaction(SIGINT, &handler, NULL) != 0) {
-        printf("\nFailed to register the SIGINT handler!\n");
+        printf("\nFailed to register the SIGINT handler: %s\n", strerror(errno));
         return EXIT_FAILURE;
     }
 
@@ -110,11 +110,11 @@ static void fetch_data(void *args) {
         exit(EXIT_FAILURE);
     }
     if ((dev_communication_socket = socket(AF_INET, SOCK_DGRAM, IP_PROTOCOL)) < 0) {
-        printf("\nFailed to create socket!\n");
+        printf("\nFailed to create socket: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
     if (connect(dev_communication_socket, (struct sockaddr *)&dev_sockaddr, sizeof(dev_sockaddr)) < 0) {
-        printf("\nConnection failed!\n");
+        printf("\nConnection failed: %s\n", strerror(errno));
         shutdown(dev_communication_socket, 0);
         close(dev_communication_socket);
         exit(EXIT_FAILURE);
@@ -125,6 +125,7 @@ static void fetch_data(void *args) {
     read_timeout.tv_usec = 500000; // 500ms
     if (setsockopt(dev_communication_socket, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof(read_timeout)) < 0) {
         perror("Failed to set the socket read timeout!\n");
+        exit(EXIT_FAILURE);
     }
         
     printf("Starting to fetch data from monitored device via UDP (IP: %s | Port: %d)\n", dev_addr->ip, dev_addr->port);

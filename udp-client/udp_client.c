@@ -95,7 +95,7 @@ void fetch_power_measurements(char server_ip[], uint16_t port, uint8_t requested
     while (listen_for_data) {
         rx_data_len = read(client_socket, rx_buffer, RECEIVE_BUFFER_SIZE);
         if (rx_data_len < 0) {
-            printf("Error during receiving!\n");
+            printf("Error during receiving: %s\n", strerror(errno));
             break;
         }
         printf("Received %d bytes from %s", rx_data_len, server_ip);
@@ -134,14 +134,14 @@ static void listen_for_requests() {
 
     printf("Trying to setup listen socket on Port %d ...\n", LISTEN_SOCKET_PORT);
     if ((listen_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
-        printf("Failed to create listen socket!\n");
+        printf("Failed to create listen socket: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
     
     printf("Successfully created the listen socket. Now binding ...\n");
     int err = bind(listen_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if (err < 0) {
-        printf("Failed to bind the socket!\n");
+        printf("Failed to bind the socket: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -152,7 +152,7 @@ static void listen_for_requests() {
 
         int rx_data_len = recvfrom(listen_socket, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&client_addr, &client_socklen);
         if (rx_data_len < 0) {
-            printf("Error during receiving!\n");
+            printf("Error during receiving on listen socket: %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
             
@@ -167,7 +167,7 @@ static void listen_for_requests() {
 
         int err = sendto(listen_socket, tx_buffer, tx_data_len, 0, (struct sockaddr *)&client_addr, client_socklen);
         if (err < 0) {
-            printf("Error occured during sending!\n");
+            printf("Error occured during sending on listen socket: %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
 
