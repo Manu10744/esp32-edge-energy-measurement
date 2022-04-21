@@ -1,21 +1,17 @@
 # Power Measurement Framework for edge-enabled IoT devices
 
-Measure the power consumption of serverless functions executed on edge-enabled devices and push the data to the existing Function Delivery Network (FDN) infrastructure (Prometheus & Grafana).<br>
+Measure the power consumption of serverless functions executed on edge-enabled devices representing the nodes in a serverless cluster. The data is pushed to and monitored by the Function Delivery Network (FDN) infrastructure (Prometheus & Grafana).<br>
 The power consumption measurements are carried out by a ESP32 powermeter.
 
-### Hardware Setup
+### System Structure
+<img src="./img/structure-diagram.png" height="450px" width="650px">
 
-<img src="./img/hardware_setup.jpg" height="450px" width="350px">
-
-- `INA3221`: the power measurement sensor with three channels
-- `ESP32 Power Measurement Node`: the microcontroller where the main software runs
-- `Jetson Nano` / `ESP32`: sample edge devices, connected to INA3221.
 <br>
 
 ### Table of Contents
 #### Main components
-- `esp32-measurement-node`: Contains the source code for the ESP32 powermeter that measures the power consumption and sends them to the edge devices via UDP communication.
-- `udp_client`: Contains the source code for the UDP client that can be used at the edge devices in order to fetch power measurements from the ESP32 powermeter.
+- `esp32-powermeter-udp-server`: Contains the source code for the ESP32 powermeter that measures the power consumption and sends them to the edge devices via UDP communication.
+- `powermeasurement-udp-client`: Contains the source code for the UDP client that can be used at the edge devices in order to fetch power measurements from the ESP32 powermeter.
 - `prometheus-power-exporter`: Contains the resources for the prometheus exporter exposing the power consumption metrics.
 - `protobuffers`: Contains the protocolbuffer messages that are used for data transmission between the individual components over the network.
 
