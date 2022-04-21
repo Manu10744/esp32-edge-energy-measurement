@@ -40,11 +40,10 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - [x] Write custom prometheus exporter for the power measurements so prometheus is able to poll the data - use sample data until later
 - [x] Test custom prometheus exporter in test k8s
 - [x] Adjust code in powermeasurement component to measure power consumption of multiple devices (multiple channels)
-- [ ] Adjust code to make it possible to use more than 1x INA3221 (-> project configuration).
-- [x] Make UDP client send a certain channel ID to demand the power measurements for it instead of hardcoding channel 3 
-- [x] Adjust code in UDP server to send the correct power measurements to multiple connected clients / devices
+- [x] Make `powermeasurement-udp-client` send a certain channel ID to demand the power measurements for it instead of hardcoding channel 3 
+- [x] Adjust code in ESP32 powermeasurement server to send the correct power measurements to multiple connected clients / devices
 - [x] Expand the hardware setup to 1x Jetson Nano + 1x ESP32 and make sure it works
-- [x] Make prometheus exporter expose the real power measurement data instead of fake data -> start with 2 simple metrics:
+- [x] Make `prometheus-power-exporter` expose the real power measurement data instead of fake data -> start with 2 simple metrics:
   - Metric 1: total energy consumption (= counter)
   - Metric 2: electrical current (= gauge)
 - [x] Transform power consumption / eletrical current metric to base unit ampere-seconds / ampere
@@ -52,8 +51,11 @@ The power consumption measurements are carried out by a ESP32 powermeter.
   - Goal: 2 running exporters exposing the real data, 2 panels in grafana visualizing it
 - [x] Send the measured current to the client as well, not just the consumed energy. 
   - This will require sending structured data => Implement protocolbuffers
-- [ ] [__UDP CLIENT__] Use the directory service providing info about the measurement node's IP
-
-### Problems
-- [ ] ESP32 powermeter crashes after around 15-20 minutes
-- [ ] Logs are not available immediately in Docker Containers of `powermeasurement-udp-client` and `prometheus-power-exporter`
+- [ ] Enable hostname resolution in `powermeasurement-udp-client` => Both IP and hostname are now valid inputs
+- [ ] Build and upload Docker Images of `powermeasurement-udp-client` and `prometheus-power-exporter` for different architectures (ARM64, AMD64, ARMv7/ARMv8)
+- [ ] Add a dummy powermeasurement server to the LRZ Cloud Cluster as the "real" ESP32 server is not accessible in that network
+- [ ] Deploy `powermeasurement-udp-client` and `prometheus-power-exporter` to each worker node in the LRZ Cloud cluster
+  - Configure Prometheus accordingly, so the data is visible in Grafana 
+- [ ] (**EXTENDED HARDWARE BOARD**): Adjust the code in `esp32-power-measurement-node` in order to use both INA3221 sensors
+- [ ] (**EXTENDED HARDWARE BOARD**): Visualize power consumption of each device on the integrated display
+  -  Idea: Display one device at a time, loop through with 1sec delay
