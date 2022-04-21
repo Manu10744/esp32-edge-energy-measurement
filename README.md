@@ -53,3 +53,7 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - [x] Send the measured current to the client as well, not just the consumed energy. 
   - This will require sending structured data => Implement protocolbuffers
 - [ ] [__UDP CLIENT__] Use the directory service providing info about the measurement node's IP
+
+### Problems
+- [ ] ESP32 powermeter crashes after around 15-20 minutes
+- [ ] Logs are not available immediately in Docker Containers of `powermeasurement-udp-client` and `prometheus-power-exporter`
