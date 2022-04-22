@@ -37,10 +37,10 @@ The build requires the following dependencies to be installed:
 - `libprom` ( => required by `prometheus-client-c`)
 - `libpromhttp` ( => required by `prometheus-client-c`)
 - `libmicrohttpd` ( => required by `libmicrohttpd`)
-- `protobuf-c`
+- `protobuf-c` (requires `protobuf`)
 
 ```bash
-gcc -Wall exporter.c power_metrics.c ../protobuffers/powermeasurements/powermeasurement.pb-c.c -o exporter -lprom -lpromhttp -lmicrohttpd -lpthread -lprotobuf-c
+make build
 ```
 
 ### Usage 
@@ -55,12 +55,9 @@ export DEVICE_UDP_PORT="<UDP_PORT>"
 ```
 
 ### Docker
-
 - Build the Docker Image:
 ```bash
-cp exporter docker
-docker build -t phyz1x/prom-power-exporter:latest .
-rm exporter
+make docker
 ```
 
 - Run the Docker Image:
