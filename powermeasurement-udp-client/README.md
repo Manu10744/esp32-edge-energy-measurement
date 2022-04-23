@@ -20,9 +20,14 @@ The required arguments are IP and port of the target UDP server as well as the c
 
 
 ### Docker
+|  OS     |  Architecture            |
+| ---     |      ---                 |
+| Ubuntu 20.04  |  AMD64, ARM64/v8   |  
+
 - Build the Docker Image:
 <br>
-**Note:** Docker `buildx` is required as this will build the image for multiple architectures.
+
+**Note:** Docker `buildx` is required as the image will be built for multiple architectures.
 ```bash
 make dockerimage
 ```

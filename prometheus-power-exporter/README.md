@@ -55,8 +55,13 @@ export DEVICE_UDP_PORT="<UDP_PORT>"
 ```
 
 ### Docker
+|  OS     |  Architecture            |
+| ---     |      ---                 |
+| Ubuntu 20.04  |  AMD64, ARM64/v8   |  
+
 - Build the Docker Image:
 <br>
+
 **Note:** Docker `buildx` is required as this will build the image for multiple architectures.
 ```bash
 make dockerimage
