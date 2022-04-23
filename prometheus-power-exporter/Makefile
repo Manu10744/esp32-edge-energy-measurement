@@ -15,7 +15,7 @@ build:
 dockerimage: 
 	@echo "Creating Docker Image $(DOCKER_IMAGE_NAME) ..."
 	@cp -R $(PROTOBUF_DIR) $(DOCKERFILE_DIR)
-	docker buildx build --platform linux/arm64/v8,linux/amd64 --tag $(DOCKER_IMAGE_NAME):latest -f $(DOCKERFILE_DIR)/Dockerfile --push .
+	docker buildx build --platform linux/arm64/v8,linux/amd64 --tag $(DOCKER_IMAGE_NAME):latest -f $(DOCKERFILE_DIR)/Dockerfile --load .
 	@rm -rf $(DOCKERFILE_DIR)/protobuffers
 
 clean:

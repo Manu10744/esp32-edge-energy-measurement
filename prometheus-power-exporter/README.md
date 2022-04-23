@@ -59,15 +59,14 @@ export DEVICE_UDP_PORT="<UDP_PORT>"
 | ---     |      ---                 |
 | Ubuntu 20.04  |  AMD64, ARM64/v8   |  
 
-- Build the Docker Image:
-<br>
+#### Build the Docker Image:
 
-**Note:** Docker `buildx` is required as this will build the image for multiple architectures.
+- **Note:** Docker `buildx` is required as this will build the image for multiple architectures.
 ```bash
 make dockerimage
 ```
 
-- Run the Docker Image:
+#### Run the Docker Image:
 ```bash
 docker run --name prometheus-power-exporter -e DEVICE_UDP_IP=127.0.0.1 -e DEVICE_UDP_PORT=5000 phyz1x/prometheus-power-exporter:latest
 ```

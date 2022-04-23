@@ -24,15 +24,14 @@ The required arguments are IP and port of the target UDP server as well as the c
 | ---     |      ---                 |
 | Ubuntu 20.04  |  AMD64, ARM64/v8   |  
 
-- Build the Docker Image:
-<br>
+#### Build the Docker Image:
 
-**Note:** Docker `buildx` is required as the image will be built for multiple architectures.
+- **Note:** Docker `buildx` is required as the image will be built for multiple architectures.
 ```bash
 make dockerimage
 ```
 
-- Run the Docker Image:
+#### Run the Docker Image:
 ```bash
 docker run --name powermeasurement-udp-client phyz1x/powermeasurement-udp-client:latest ./udp_client 127.0.0.1 3333 3
 ```
