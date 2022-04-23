@@ -10,7 +10,7 @@ LIBS = -lprotobuf-c -lpthread
 COMPILED_FILENAME = udp_client
 
 build:
-	gcc -g -I/usr/include $(SRCS) -o $(COMPILED_FILENAME) -L/usr/lib $(LIBS)
+	gcc -Wall -g -I/usr/include $(SRCS) -o $(COMPILED_FILENAME) -L/usr/lib $(LIBS)
 
 dockerimage: 
 	@echo "Creating Docker Image $(DOCKER_IMAGE_NAME) ..."
