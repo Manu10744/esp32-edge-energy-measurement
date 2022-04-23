@@ -21,8 +21,10 @@ The required arguments are IP and port of the target UDP server as well as the c
 
 ### Docker
 - Build the Docker Image:
+<br>
+**Note:** Docker `buildx` is required as this will build the image for multiple architectures.
 ```bash
-make docker
+make dockerimage
 ```
 
 - Run the Docker Image:

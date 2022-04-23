@@ -12,8 +12,16 @@ COMPILED_FILENAME = exporter
 build:
 	gcc -Wall $(SRCS) -o $(COMPILED_FILENAME) $(LIBS)
 
-docker: 
-	cp $(COMPILED_FILENAME) $(DOCKERFILE_DIR)
-	docker build -t $(DOCKER_IMAGE_NAME) $(DOCKERFILE_DIR)
-	rm $(DOCKERFILE_DIR)/$(COMPILED_FILENAME)
-	docker push $(DOCKER_IMAGE_NAME)
+dockerimage: 
+	@echo "Creating Docker Image $(DOCKER_IMAGE_NAME) ..."
+	@cp -R $(PROTOBUF_DIR) $(DOCKERFILE_DIR)
+	docker buildx build --platform linux/arm64/v8,linux/amd64 --tag $(DOCKER_IMAGE_NAME):latest -f $(DOCKERFILE_DIR)/Dockerfile --push .
+	@rm -rf $(DOCKERFILE_DIR)/protobuffers
+
+clean:
+	@if test -f "$(COMPILED_FILENAME)"; then\
+		@echo "Removing file $(COMPILED_FILENAME)";\
+    	rm $(COMPILED_FILENAME);\
+	else\
+		@echo "File $(COMPILED_FILENAME) cannot be removed, as it does not exist, yet.";\
+	fi

@@ -56,8 +56,10 @@ export DEVICE_UDP_PORT="<UDP_PORT>"
 
 ### Docker
 - Build the Docker Image:
+<br>
+**Note:** Docker `buildx` is required as this will build the image for multiple architectures.
 ```bash
-make docker
+make dockerimage
 ```
 
 - Run the Docker Image:
