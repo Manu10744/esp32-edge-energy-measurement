@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: monitoring
+  name: powermeasurement-udp-client-deployment
+  labels:
+    app: powermeasurement-udp-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: powermeasurement-udp-client
+  template:
+    metadata:
+      labels:
+        app: powermeasurement-udp-client
+    spec:
+      containers:
+      - name: powermeasurement-udp-client
+        image: phyz1x/powermeasurement-udp-client:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 250m
+            memory: 180Mi
+          requests:
+            cpu: 102m
+            memory: 180Mi
+        env:
+          - name: POWERMETER_SERVER_IP
+            value: "10.1.1.39"
+          - name: POWERMETER_SERVER_PORT
+            value: "10000"
+          - name: INA3221_CHANNEL
+            value: "3"
