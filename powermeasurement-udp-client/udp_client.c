@@ -14,6 +14,10 @@
 #include "udp_client.h"
 #include "../protobuffers/powermeasurements/powermeasurement.pb-c.h"
 
+#define ENV_VAR_IP "POWERMETER_SERVER_IP" 
+#define ENV_VAR_PORT "POWERMETER_SERVER_PORT"
+#define ENV_VAR_CHANNEL "INA3221_CHANNEL"
+
 #define IP_PROTOCOL 0
 #define RECEIVE_BUFFER_SIZE 1024
 #define SEND_BUFFER_SIZE 16
@@ -34,13 +38,25 @@ int main(int argc, char *argv[]) {
     uint8_t requested_channel;
     pthread_t listen_thread_id;
 
-    if (argc != 4) {
-        printf("\nUsage: %s <server_ip> <server_port> <channel>\n", argv[0]);
+    if (argc == 1) {
+        // Determine IP, port and channel via ENVs...
+        if (!getenv(ENV_VAR_IP) || !getenv(ENV_VAR_PORT) || !getenv(ENV_VAR_CHANNEL)) {
+            printf("\nWrong usage - ENVs '%s', '%s' and '%s' must be set when no arguments are given!\n", ENV_VAR_IP, ENV_VAR_PORT, ENV_VAR_CHANNEL);
+            return EXIT_FAILURE;
+        }
+        strcpy(server_ip, getenv(ENV_VAR_IP));
+        port = strtoul(getenv(ENV_VAR_PORT), NULL, 10);
+        requested_channel = strtoul(getenv(ENV_VAR_CHANNEL), NULL, 10);
+    } else if (argc == 4) {
+        // Determine IP, port and channel via args ...
+        strcpy(server_ip, argv[1]);
+        port = strtoul(argv[2], NULL, 10);
+        requested_channel = strtoul(argv[3], NULL, 10);
+    } else {
+        printf("\nWrong usage - Execute %s <server_ip> <server_port> <channel> or just %s with ENVs '%s', '%s' and '%s' being set.\n",
+               argv[0], ENV_VAR_IP, ENV_VAR_PORT, ENV_VAR_CHANNEL);
         return EXIT_FAILURE;
     }
-    strcpy(server_ip, argv[1]);
-    port = strtoul(argv[2], NULL, 10);
-    requested_channel = strtoul(argv[3], NULL, 10);
 
     struct sigaction handler;
     handler.sa_handler = handle_sigint;
@@ -66,11 +82,11 @@ int main(int argc, char *argv[]) {
  */
 void fetch_power_measurements(char server_ip[], uint16_t port, uint8_t requested_channel) {
     int client_socket = 0;
-    int rx_data_len;
-    char rx_buffer[RECEIVE_BUFFER_SIZE] = {0};
+    uint8_t rx_buffer[RECEIVE_BUFFER_SIZE];
+    size_t rx_data_len;
     char tx_buffer[SEND_BUFFER_SIZE] = {0};
+
     struct sockaddr_in serv_addr;
-    
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(port);   
 
@@ -89,7 +105,7 @@ void fetch_power_measurements(char server_ip[], uint16_t port, uint8_t requested
         exit(EXIT_FAILURE);
     }
     
-    int tx_data_len = sprintf(tx_buffer, "%u", requested_channel);
+    size_t tx_data_len = sprintf(tx_buffer, "%u", requested_channel);
     send(client_socket, tx_buffer, tx_data_len + 1, 0);
 
     while (listen_for_data) {

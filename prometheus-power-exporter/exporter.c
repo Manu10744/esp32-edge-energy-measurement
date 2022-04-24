@@ -99,7 +99,8 @@ int main(int argc, char *argv[]) {
  */
 static void fetch_data(void *args) {
     dev_udp_address_t *dev_addr = args;
-    char rx_buffer[RECEIVE_BUFFER_SIZE] = {0};
+    uint8_t rx_buffer[RECEIVE_BUFFER_SIZE];
+    size_t rx_data_len;
 
     struct sockaddr_in dev_sockaddr;
     dev_sockaddr.sin_family = AF_INET;
@@ -132,7 +133,7 @@ static void fetch_data(void *args) {
     while (1) {
         send(dev_communication_socket, "HELLO", strlen("HELLO"), 0);
 
-        int rx_data_len = read(dev_communication_socket, rx_buffer, RECEIVE_BUFFER_SIZE);
+        rx_data_len = read(dev_communication_socket, rx_buffer, RECEIVE_BUFFER_SIZE);
         if (rx_data_len < 0) {
             printf("Failed to receive data from the monitored device: %s\n", strerror(errno));
         } else {
@@ -170,7 +171,7 @@ static void init_exporter() {
     printf("Starting HTTP daemon on port %d in the background.\n", HTTP_DAEMON_PORT);
     http_daemon = promhttp_start_daemon(MHD_USE_SELECT_INTERNALLY, HTTP_DAEMON_PORT, NULL, NULL);
     if (http_daemon == NULL) {
-        printf("\nFailed to start the exporter HTTP daemon!\n");
+        printf("\nFailed to start the exporter HTTP daemon: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 }
