@@ -2,27 +2,29 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: monitoring
-  name: power-exporter-deployment
+  name: mock-powermeasurement-server
   labels:
-    app: power-exporter
+    app: mock-powermeasurement-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: power-exporter
+      app: mock-powermeasurement-server
   template:
     metadata:
       labels:
-        app: power-exporter
+        app: mock-powermeasurement-server
     spec:
       containers:
-      - name: power-exporter
-        image: phyz1x/prometheus-power-exporter:latest
-        env:
-          - name: DEVICE_UDP_IP
-            value: "192.168.178.28"
-          - name: DEVICE_UDP_PORT
-            value: "5000"
+      - name: mock-powermeasurement-server
+        image: phyz1x/mock-powermeasurement-server:1.0.0
         imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 250m
+            memory: 180Mi
+          requests:
+            cpu: 102m
+            memory: 180Mi
         ports:
-        - containerPort: 8000
+        - containerPort: 10000

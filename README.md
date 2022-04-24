@@ -49,7 +49,7 @@ The power consumption measurements are carried out by a ESP32 powermeter.
   - This will require sending structured data => Implement protocolbuffers
 - [ ] Enable hostname resolution in `powermeasurement-udp-client` => Both IP and hostname are now valid inputs
 - [ ] Build and upload Docker Images of `powermeasurement-udp-client` and `prometheus-power-exporter` for different architectures (ARM64, AMD64, ARMv7/ARMv8)
-- [ ] Add a dummy powermeasurement server to the LRZ Cloud Cluster as the "real" ESP32 server is not accessible in that network
+- [x] Add a dummy powermeasurement server to the LRZ Cloud Cluster as the "real" ESP32 server is not accessible in that network
 - [ ] Deploy `powermeasurement-udp-client` and `prometheus-power-exporter` to each worker node in the LRZ Cloud cluster
   - Configure Prometheus accordingly, so the data is visible in Grafana 
 - [ ] (**EXTENDED HARDWARE BOARD**): Adjust the code in `esp32-power-measurement-node` in order to use both INA3221 sensors
