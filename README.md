@@ -43,7 +43,7 @@ The power consumption measurements are carried out by a ESP32 powermeter.
   - Metric 1: total energy consumption (= counter)
   - Metric 2: electrical current (= gauge)
 - [x] Transform power consumption / eletrical current metric to base unit ampere-seconds / ampere
-- [ ] Deploy the exporter for the ESP32 and expand the grafana dashboard with a panel for the ESP32 exporter 
+- [x] Deploy the exporter for the ESP32 and expand the grafana dashboard with a panel for the ESP32 exporter 
   - Goal: 2 running exporters exposing the real data, 2 panels in grafana visualizing it
 - [x] Send the measured current to the client as well, not just the consumed energy. 
   - This will require sending structured data => Implement protocolbuffers

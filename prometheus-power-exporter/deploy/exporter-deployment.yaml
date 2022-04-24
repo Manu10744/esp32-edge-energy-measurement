@@ -18,11 +18,18 @@ spec:
       containers:
       - name: power-exporter
         image: phyz1x/prometheus-power-exporter:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 250m
+            memory: 180Mi
+          requests:
+            cpu: 102m
+            memory: 180Mi
         env:
           - name: DEVICE_UDP_IP
-            value: "192.168.178.28"
+            value: "10.1.1.40"
           - name: DEVICE_UDP_PORT
             value: "5000"
-        imagePullPolicy: Always
         ports:
         - containerPort: 8000
