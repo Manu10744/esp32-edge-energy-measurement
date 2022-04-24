@@ -1,3 +1,7 @@
+# Docker
+DOCKER_IMAGE_NAME = phyz1x/mock-powermeasurement-server
+DOCKERFILE_DIR = ./docker
+
 PROTOBUF_DIR = ../../protobuffers
 
 # Compilation
@@ -10,8 +14,14 @@ build:
 
 clean:
 	@if test -f "$(COMPILED_FILENAME)"; then\
-		@echo "Removing file $(COMPILED_FILENAME)";\
+		echo "Removing file $(COMPILED_FILENAME)";\
     	rm $(COMPILED_FILENAME);\
 	else\
-		@echo "File $(COMPILED_FILENAME) cannot be removed, as it does not exist, yet.";\
+		echo "Cannot remove $(COMPILED_FILENAME): File doesn't exist.";\
 	fi
+
+dockerimage:
+	make build
+	cp mock_server ./docker
+	docker build -t $(DOCKER_IMAGE_NAME) -f $(DOCKERFILE_DIR)/Dockerfile .
+	rm ./docker/mock_server
