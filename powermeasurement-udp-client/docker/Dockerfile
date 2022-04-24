@@ -26,4 +26,7 @@ RUN useradd --no-log-init --create-home --shell /bin/bash udp-client
 COPY --from=builder --chown=udp-client:udp-client /builder/app/udp_client .
 
 USER udp-client 
-CMD ./udp_client 
+
+# Force line-buffered output in order to see docker logs immediately. 
+# (Otherwise fully-buffered would be used by default as there is no tty)
+CMD stdbuf -oL ./udp_client 

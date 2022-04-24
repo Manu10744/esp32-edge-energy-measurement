@@ -44,4 +44,7 @@ RUN useradd --no-log-init --create-home --shell /bin/bash power-exporter
 COPY --from=builder --chown=power-exporter:power-exporter /builder/app/exporter .
 
 USER power-exporter 
-CMD ./exporter
+
+# Force line-buffered output in order to see docker logs immediately. 
+# (Otherwise fully-buffered would be used by default as there is no tty)
+CMD stdbuf -oL ./exporter
