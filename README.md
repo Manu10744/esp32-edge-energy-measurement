@@ -4,7 +4,7 @@ Measure the power consumption of serverless functions executed on edge-enabled d
 The power consumption measurements are carried out by a ESP32 powermeter.
 
 ### System Structure
-<img src="./img/structure-diagram.png" height="450px" width="650px">
+<img src="./img/structure-diagram.png" height="100%" width="100%">
 
 <br>
 
@@ -48,10 +48,11 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - [x] Send the measured current to the client as well, not just the consumed energy. 
   - This will require sending structured data => Implement protocolbuffers
 - [ ] Enable hostname resolution in `powermeasurement-udp-client` => Both IP and hostname are now valid inputs
-- [ ] Build and upload Docker Images of `powermeasurement-udp-client` and `prometheus-power-exporter` for different architectures (ARM64, AMD64, ARMv7/ARMv8)
+- [x] Build and upload Docker Images of `powermeasurement-udp-client` and `prometheus-power-exporter` for different architectures (ARM64v8, AMD64)
 - [x] Add a dummy powermeasurement server to the LRZ Cloud Cluster as the "real" ESP32 server is not accessible in that network
 - [ ] Deploy `powermeasurement-udp-client` and `prometheus-power-exporter` to each worker node in the LRZ Cloud cluster
-  - Configure Prometheus accordingly, so the data is visible in Grafana 
+  - Extend `example.jsonnet` in `kube-prometheus` accordingly and recompile manifests
+  - Ensure that everything works on Grafana's end
 - [ ] (**EXTENDED HARDWARE BOARD**): Adjust the code in `esp32-power-measurement-node` in order to use both INA3221 sensors
 - [ ] (**EXTENDED HARDWARE BOARD**): Visualize power consumption of each device on the integrated display
   -  Idea: Display one device at a time, loop through with 1sec delay
