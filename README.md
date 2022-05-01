@@ -50,7 +50,7 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - [ ] Enable hostname resolution in `powermeasurement-udp-client` => Both IP and hostname are now valid inputs
 - [x] Build and upload Docker Images of `powermeasurement-udp-client` and `prometheus-power-exporter` for different architectures (ARM64v8, AMD64)
 - [x] Add a dummy powermeasurement server to the LRZ Cloud Cluster as the "real" ESP32 server is not accessible in that network
-- [ ] Deploy `powermeasurement-udp-client` and `prometheus-power-exporter` to each worker node in the LRZ Cloud cluster
+- [x] Deploy `powermeasurement-udp-client` and `prometheus-power-exporter` to each worker node in the LRZ Cloud cluster
   - Extend `example.jsonnet` in `kube-prometheus` accordingly and recompile manifests
   - Ensure that everything works on Grafana's end
 - [ ] Add `dashboards.libsonnet` to `prometheus-power-exporter` and include it in the `kube-prometheus` grafana instance.
