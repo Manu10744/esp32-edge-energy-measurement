@@ -1,0 +1,26 @@
+\chapter{Background}\label{chapter:background}
+
+\section{Cluster Monitoring \& Data Visualization}
+
+\subsection{Prometheus}
+Prometheus is an Open-Source, cutting-edge monitoring system that enables administrators to effectively supervise a system's infrastructure and associated applications. It is well known for its poll-based data collection model which regularly scrapes metrics over HTTP from the services being monitored, which are usually referred to as \textit{targets}, using a configurable time interval. Any data collected by a successful scrape is stored in a time-series database, which enables Prometheus to keep track of changes of the individual metrics over time. For the purpose of data selection and performing operations on the data, Prometheus provides an own query language called \textit{PromQL} which defines a wide range of functions that can be utilized in query expressions. Furthermore, it allows to define certain alert rules that are based on the collected data in order to trigger an alert once a specific condition defined in those rules is met. This allows for sending automatic notifications to administrating staff, which can then act appropriately based on what kind of alert has been triggered.\\
+Generally, there is already a comprehensive amount of applications that natively expose metrics in the format expected by Prometheus. For any cases where this does not apply, a so-called data exporter can be employed, which is responsible for fetching data from third-party systems and transforming them into metrics that can be processed by Prometheus. To this end, client libraries that are available for a variety of programming languages can be made use of in order to implement such an exporter for a specific application.
+
+
+\subsection{Grafana}
+Grafana is a modern Open-Source data analytics \& visualization platform that offers the possibility to plot data, which can be obtained from a variety of different sources, in interactive, dynamic dashboards. Prometheus is one of the most commonly used data sources for Grafana, which qualifies it as another powerful component of a modern system monitoring toolchain. Due to the fact that it provides the opportunity to construct an arbitrary amount of dashboards that are highly configurable, users are able to achieve a visualization of their data that satisfies individual requirements.
+
+\section{Edge-Enabled IoT Devices}
+\subsection{Raspberry Pi 3}
+The Raspberry Pi 3 is the third generation model of the probably most commonly known single-board computer - the Raspberry Pi. It was developed by the british Raspberry Pi Foundation and is equipped with 1 GB of RAM and a Cortex-A53 Quad-Core ARM64 processor that operates at 1.2 GHz. It demands a power supply of 5V at 2.5A in order to be operated.
+
+
+\subsection{NVIDIA Jetson Nano Developer Kit}
+The NVIDIA Jetson Nano Developer Kit is a performant single-board computer developed by the NVIDIA Corporation and is primarily designed for the purpose of developing and executing AI applications. To this end, it is provided with a Cortex-A57 Quad-Core ARM64 CPU that runs at 1.43 GHz as well as with an NVIDIA 128-core Maxwell GPU. Additionally, the Jetson Nano Developer Kit has access to 4 GB of LPDDR4 RAM and requires a slightly higher power supply of 5V at 2.5A - however, supplying up to 4A is recommended.
+
+\subsection{Google Coral Dev Board}
+The Coral Dev Board is a single-board computer designed to facilitate machine learning inference and embedded system development. Next to a Vivante GC7000Lite GPU and a Cortex-A53 Quad-Core ARM64 processor that operates at up to 1.5 GHz, it is equipped with an Edge TPU coprocessor developed by Google which significantly leverages the performance. Moreover, it is provided with 1 GB of LPDDR4 RAM and demands a power supply of 5V at 2-3A.
+
+\subsection{Odroid XU4}
+The Odroid XU4 is a powerful single-board computer that comes with a SAMSUNG Exynos 5422 Octa-Core ARM CPU, which operates at 2 GHz, in addition to an integrated Mali-T628MP6 GPU and 2 GB of available LPDDR3 RAM. In order to operate the XU4, providing a power source supplying 5V at 4A is necessary.
+
