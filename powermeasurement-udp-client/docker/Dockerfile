@@ -4,7 +4,7 @@ WORKDIR /builder
 
 # Install dependencies needed for compiling
 RUN apt-get update && \
-    apt-get install -y make build-essential libprotobuf-c-dev && \
+    apt-get install -y make build-essential libconfuse-dev libprotobuf-c-dev && \
     ldconfig
 
 # Copy program files and protobuffers
@@ -19,7 +19,7 @@ FROM ubuntu:20.04
 WORKDIR /opt/powermeasurement-udp-client
 
 RUN apt-get update && \
-    apt-get install -y libprotobuf-c-dev  && \
+    apt-get install -y libconfuse-dev libprotobuf-c-dev  && \
     ldconfig
 
 RUN useradd --no-log-init --create-home --shell /bin/bash udp-client
