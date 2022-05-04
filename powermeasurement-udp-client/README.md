@@ -7,15 +7,54 @@ A UDP listen socket on port `5000` is created on another thread so external sour
 ### Build
 The build requires the following dependencies to be installed:
 - `protobuf-c` (requires `protobuf`)
+- `libconfuse`
 
 ```bash
 make build
 ```
 
 ### Usage
-The required arguments are IP and port of the target UDP server as well as the channel (e.g. `2`) to fetch power measurements from.
+
+#### Using a configuration file
+The UDP client can optionally be used with a configuration file, which defines the power measurement configuration for each node. This makes monitoring a whole cluster where each node uses a client fetching data for a different INA3221 channel easier.
+
+It is expected to conform to the following format:
+
+```text
+node node01 {
+	powermeter_server = "127.0.0.1"
+	powermeter_port = 10000
+	channel = 1
+}
+
+node node02 {
+	powermeter_server = "127.0.0.1"
+	powermeter_port = 10000
+	channel = 2
+}
+```
+
+The path of the configuration file can be specified by the environment variable `POWERMONITORING_CONFIG_PATH`.<br>
+When using a configuration file, the environment variable `NODENAME` has to be set, which is used for loading the node-specific configuration from the configuration file. 
+
 ```bash
-./udp-client <UDP_IP> <UDP_PORT> <INA3221_CHANNEL>
+# Example
+export POWERMONITORING_CONFIG_PATH="./config/monitoring-config.conf"
+export NODENAME="node02"
+./udp_client
+```
+<br>
+
+#### Using arguments / Environment Variables
+```bash
+# Execute either with arguments ...
+./udp_client <UDP_IP> <UDP_PORT> <INA3221_CHANNEL>
+
+# ... or by using ENVs
+export POWERMETER_SERVER_IP="<SERVER_IP>"
+export POWERMETER_SERVER_PORT="<SERVER_PORT>"
+export INA3221_CHANNEL="<INA3221_CHANNEL>"
+./udp_client
 ```
 
 

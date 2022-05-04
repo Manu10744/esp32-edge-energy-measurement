@@ -6,7 +6,7 @@ PROTOBUF_DIR = ../protobuffers
 
 # Compilation
 SRCS = udp_client.c $(PROTOBUF_DIR)/powermeasurements/powermeasurement.pb-c.c
-LIBS = -lprotobuf-c -lpthread
+LIBS = -lprotobuf-c -lpthread -lconfuse
 COMPILED_FILENAME = udp_client
 
 build:
