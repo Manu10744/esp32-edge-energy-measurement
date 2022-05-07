@@ -61,7 +61,7 @@ export INA3221_CHANNEL="<INA3221_CHANNEL>"
 ### Docker
 |  OS     |  Architecture            |
 | ---     |      ---                 |
-| Ubuntu 20.04  |  AMD64, ARM64/v8   |  
+| Ubuntu 20.04  |  AMD64, ARMv7, ARM64/v8   |  
 
 #### Build the Docker Image:
 
@@ -72,5 +72,5 @@ make dockerimage
 
 #### Run the Docker Image:
 ```bash
-docker run --name powermeasurement-udp-client phyz1x/powermeasurement-udp-client:latest ./udp_client 127.0.0.1 3333 3
+docker run --name powermeasurement-udp-client -e POWERMETER_SERVER_IP="127.0.0.1" -e POWERMETER_SERVER_PORT="10000" -e INA3221_CHANNEL="3" phyz1x/powermeasurement-udp-client:1.0.0
 ```

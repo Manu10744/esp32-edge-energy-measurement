@@ -55,6 +55,7 @@ The power consumption measurements are carried out by a ESP32 powermeter.
   - Ensure that everything works on Grafana's end
 - [ ] Add `dashboards.libsonnet` to `prometheus-power-exporter` and include it in the `kube-prometheus` grafana instance.
 - [x] Add possibility to use `powermeasurement-udp-client` with a config file (needed for kubernetes `ConfigMap`)
+- [] (1/2) Add ARMv7 Docker Image for `powermeasurement-udp-client` and `prometheus-power-exporter`
 - [ ] (**EXTENDED HARDWARE BOARD**): Adjust the code in `esp32-power-measurement-node` in order to use both INA3221 sensors
 - [ ] (**EXTENDED HARDWARE BOARD**): Setup a full cluster with running monitoring daemons
 - [ ] (**EXTENDED HARDWARE BOARD**): Visualize power consumption of each device on the integrated display

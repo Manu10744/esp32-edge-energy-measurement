@@ -17,3 +17,19 @@ The required arguments are IP and port of the target UDP server as well as the c
 ```bash
 ./mock_server
 ```
+
+### Docker
+|  OS     |  Architecture            |
+| ---     |      ---                 |
+| Ubuntu 20.04  |  AMD64 |  
+
+#### Build the Docker Image:
+
+```bash
+make dockerimage
+```
+
+#### Run the Docker Image:
+```bash
+docker run --name mock-powermeasurement-server phyz1x/mock-powermeasurement-server:1.0.0
+```

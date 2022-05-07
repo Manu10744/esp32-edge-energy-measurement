@@ -141,7 +141,7 @@ static void fetch_data(void *args) {
             if (measurement == NULL) {
                 printf("Failed to deserialize the received data!\n");
             } else {
-                printf("\nTimestamp: %lu \nEnergy Consumption: %lf mAs \nCurrent: %f mA\n\n", 
+                printf("\nTimestamp: %llu \nEnergy Consumption: %lf mAs \nCurrent: %f mA\n\n", 
                        measurement->timestamp, measurement->energy_consumption, measurement->current);
 
                 power_measurement__free_unpacked(measurement, NULL);

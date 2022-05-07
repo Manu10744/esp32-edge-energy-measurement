@@ -75,8 +75,8 @@ int main(int argc, char *argv[]) {
             port = strtoul(argv[2], NULL, 10);
             requested_channel = strtoul(argv[3], NULL, 10);
         } else {
-            printf("\nWrong usage - Execute %s <server_ip> <server_port> <channel> or just %s with ENVs '%s', '%s' and '%s' being set.\n",
-                   argv[0], ENV_VAR_IP, ENV_VAR_PORT, ENV_VAR_CHANNEL);
+            printf("\nWrong usage - Execute %s <server_ip> <server_port> <channel>\n", argv[0]);
+            printf("Alternatively, execute %s with ENVs '%s', '%s' and '%s' being set.\n", argv[0], ENV_VAR_IP, ENV_VAR_PORT, ENV_VAR_CHANNEL);
             return EXIT_FAILURE;
         }
     }
@@ -147,7 +147,7 @@ void fetch_power_measurements(char server_ip[], uint16_t port, uint8_t requested
         latest_measurement = *measurement;
         power_measurement__free_unpacked(measurement, NULL);
 
-        printf("\nTimestamp: %lu \nEnergy Consumption: %lf mAs \nCurrent: %f mA\n\n", 
+        printf("\nTimestamp: %llu \nEnergy Consumption: %lf mAs \nCurrent: %f mA\n\n", 
             latest_measurement.timestamp, latest_measurement.energy_consumption, latest_measurement.current);
     }
 
