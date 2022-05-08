@@ -1,3 +1,10 @@
+# Python
+**/__pycache__/**
+**/venv/**
+
+# PyCharm
+**/.idea/**
+
 # VSCode
 .vscode
 .devcontainer

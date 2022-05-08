@@ -9,7 +9,6 @@ RUN apt-get update && \
 
 # Copy program files and protobuffers
 COPY * ./app/
-COPY ./docker/protobuffers ./protobuffers
 
 RUN cd ./app && make build
 

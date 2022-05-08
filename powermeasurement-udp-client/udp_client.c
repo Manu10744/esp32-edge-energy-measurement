@@ -13,7 +13,7 @@
 #include <protobuf-c/protobuf-c.h>
 
 #include "udp_client.h"
-#include "../protobuffers/powermeasurements/powermeasurement.pb-c.h"
+#include "powermeasurement.pb-c.h"
 
 #define CONFIG_FILE_NODE_SECTION_ID "node"
 #define CONFIG_FILE_POWERMETER_SERVER_ID "powermeter_server"

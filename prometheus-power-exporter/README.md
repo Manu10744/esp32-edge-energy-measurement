@@ -3,6 +3,28 @@
 This module contains the code and resources for the prometheus exporter responsible for exposing the power consumption related metrics of a specific edge device.<br>
 The exporter fetches the necessary data from the monitored device using UDP communication, updates the metrics accordingly and exposes them using a HTTP daemon in the format required by prometheus.
 
+<br>
+
+### Dependencies
+
+The exporter is built on top of the [Official Python Prometheus Client](https://github.com/prometheus/client_python).<br>
+Additionally, `Protocolbuffers` are used for the communication between a target device and its exporter - the implementation used is https://github.com/danielgtaylor/python-betterproto. Both can be installed with `pip`:
+
+```bash
+pip install prometheus_client
+pip install betterproto
+```
+
+<br>
+
+### Prometheus Metrics
+
+| Name | Type | Description |
+| ---  |  --- |    ---      |
+|  powerexporter_power_consumption_ampere_seconds_total    |  Counter    |       The total power consumption of the target device in As (ampere-seconds).      | 
+|   powerexporter_current_ampere   |  Gauge    |    The measured electric current in A (ampere).         | 
+
+
 ### Access metrics
 The exported metrics can be accessed on port `8000` by executing an `HTTP GET` request to the `/metrics` endpoint.
 ```bash
@@ -23,25 +45,7 @@ powerexporter_power_consumption_ampere_seconds_total 304
 powerexporter_current_ampere 1.5999999046325684
 ```
 
-The exporter is built on top of the [Prometheus C Client by DigitalOcean](https://github.com/digitalocean/prometheus-client-c). Protocolbuffers are used in order to communicate with the device being monitored, which adds `protobuf-c` as a requirement.
-
-### Prometheus Metrics
-
-| Name | Type | Description |
-| ---  |  --- |    ---      |
-|  powerexporter_power_consumption_ampere_seconds_total    |  Counter    |       The total power consumption of the target device in As (ampere-seconds).      | 
-|   powerexporter_current_ampere   |  Gauge    |    The measured electric current in A (ampere).         | 
-
-### Build
-The build requires the following dependencies to be installed:
-- `libprom` ( => required by `prometheus-client-c`)
-- `libpromhttp` ( => required by `prometheus-client-c`)
-- `libmicrohttpd` ( => required by `libmicrohttpd`)
-- `protobuf-c` (requires `protobuf`)
-
-```bash
-make build
-```
+<br>
 
 ### Usage 
 ```bash
@@ -54,10 +58,12 @@ export DEVICE_UDP_PORT="<UDP_PORT>"
 ./exporter 
 ```
 
+<br>
+
 ### Docker
 |  OS     |  Architecture            |
 | ---     |      ---                 |
-| Ubuntu 20.04  |  AMD64, ARM64/v8   |  
+| Debian 11  |  AMD64, ARMv7, ARM64/v8   |  
 
 #### Build the Docker Image:
 
