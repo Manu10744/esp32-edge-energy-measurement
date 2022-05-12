@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: powermeasurement-udp-client
-        image: phyz1x/powermeasurement-udp-client:latest
+        image: phyz1x/powermeasurement-udp-client:1.0.0
         imagePullPolicy: Always
         resources:
           limits:

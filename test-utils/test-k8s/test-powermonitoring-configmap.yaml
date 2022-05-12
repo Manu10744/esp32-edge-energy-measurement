@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: monitoring
+  name: power-monitoring-config
+data:
+ power-monitoring.conf: |
+        node docker-desktop {
+            powermeter_server = "10.1.1.53"
+            powermeter_port = 10000
+            channel = 1
+        }

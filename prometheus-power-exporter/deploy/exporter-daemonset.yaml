@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: power-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: power-exporter
+  template:
+    metadata:
+      labels:
+        app: power-exporter
+    spec:
+      containers:
+      - name: power-exporter
+        image: phyz1x/prometheus-power-exporter:1.0.0
+        env:
+        - name: DEVICE_UDP_IP
+          value: 127.0.0.1
+        - name: DEVICE_UDP_PORT
+          value: "5000"
+        ports:
+        - containerPort: 8000
+          name: http
+        resources:
+          limits:
+            cpu: 250m
+            memory: 180Mi
+          requests:
+            cpu: 102m
+            memory: 180Mi
+      - name: powermeasurement-udp-client
+        image: phyz1x/powermeasurement-udp-client:1.0.0
+        env:
+        - name: NODENAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: POWERMONITORING_CONFIG_PATH
+          value: /config/power-monitoring.conf
+        ports:
+        - containerPort: 5000
+          name: http
+        resources:
+          limits:
+            cpu: 250m
+            memory: 180Mi
+          requests:
+            cpu: 102m
+            memory: 180Mi
+        volumeMounts:
+        - mountPath: /config/
+          name: power-monitoring-config
+          readOnly: true
+      hostNetwork: true
+      hostPID: true
+      volumes:
+      - configMap:
+          items:
+          - key: power-monitoring.conf
+            path: power-monitoring.conf
+          name: power-monitoring-config
+        name: power-monitoring-config

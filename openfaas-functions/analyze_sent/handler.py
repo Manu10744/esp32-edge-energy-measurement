@@ -1,10 +1,12 @@
+import json
 import nltk
 
 from nltk.tokenize import word_tokenize
 
-def main(params):
+def handle(req):
     """ Analyzes an english sentence by tokenizing and POS-tagging it. """
-    sentence = params.get("sentence")
+    request_json = json.loads(req)
+    sentence = request_json["sentence"]
 
     tokens = word_tokenize(sentence)
 
@@ -18,4 +20,3 @@ def main(params):
         })
 
     return {"sentence": sentence, "tokens": analysis}
-

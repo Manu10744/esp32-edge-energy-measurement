@@ -17,7 +17,7 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 
 #### Test utils
 - `test-utils`: scripts and utilities to test functionality, especially the resources needed for a local kubernetes cluster needed for testing.
-- `functions`: Contains the serverless function(s) to apply for tests.
+- `openfaas-functions`: Contains the serverless function(s) for OpenFaaS to apply for tests.
 
 #
 
