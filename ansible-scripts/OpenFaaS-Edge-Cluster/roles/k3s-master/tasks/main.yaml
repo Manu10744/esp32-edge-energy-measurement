@@ -1,0 +1,86 @@
+- name: Uninstall old packages
+  become: True
+  apt:
+    state: absent
+    pkg:
+      - kubelet
+      - kubeadm
+      - kubernetes-cni
+
+- name: Run k3s master
+  become: True
+  shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--kube-apiserver-arg=enable-admission-plugins=NodeRestriction,PodNodeSelector" sh -
+
+- name: Create config directory for non-root user
+  become: True
+  file:
+    path: $PWD/.kube
+    state: directory
+    mode: "0755"
+
+- name: Copy config file to non-root user directory
+  copy:
+    remote_src: yes
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: $PWD/.kube/config
+    owner: "{{ user }}"
+    mode: 0600
+  become: True
+
+- name: Fetch config
+  fetch:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: from_remote/kubeconfig.conf
+  become: True
+
+- name: Check for taint
+  become: "{{ user }}"
+  shell: kubectl describe node {{ ansible_hostname }} | grep "node-role.kubernetes.io/master:NoSchedule"
+  register: hasTaint
+  ignore_errors: True
+
+- name: Remove the taint from master
+  become: "{{ user }}"
+  command: kubectl taint node {{ ansible_hostname }} node-role.kubernetes.io/master-
+  when: hasTaint is succeeded
+
+- name: Copy files to host
+  become: True
+  copy:
+    src: "{{ role_path }}/files/"
+    dest: $PWD/my_openfaas/
+
+- name: Install K8s dashboard
+  become: "{{ user }}"
+  command: "{{ item }}"
+  with_items:
+   - kubectl apply -f my_openfaas/dashboard.yaml
+   - kubectl create clusterrolebinding serviceaccounts-cluster-admin --clusterrole=cluster-admin --group=system:serviceaccounts
+
+#- name: Copy dashboard-admin-user.yaml to the cluster
+#  become: True
+#  copy:
+#    src: "{{ role_path }}/files/dashboard-admin.yaml"
+#    dest: $PWD/my_openfaas/dashboard-admin-user.yaml
+#
+#- name: Create the admin user
+#  become: "{{ user }}"
+#  command: kubectl apply -f my_openfaas/dashboard-admin.yaml
+#
+#- name: Save token to file
+#  become: "{{ user }}"
+#  shell: kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}') | grep "token:" | awk '{print $2}' | tee admin-user-token.out
+#
+#- name: Fetch dashboard token from remote
+#  fetch:
+#    src: admin-user-token.out
+#    dest: from_remote/
+
+- name: Fetch join token
+  become: True
+  command: cat /var/lib/rancher/k3s/server/node-token
+  register: join_token
+
+- name: Fetch join command to local file
+  become: false
+  local_action: copy content="curl -sfL https://get.k3s.io | K3S_URL=https://{{ ansible_host }}:6443 K3S_TOKEN={{ join_token.stdout_lines[0] }} sh -" dest="./from_remote/join-command"

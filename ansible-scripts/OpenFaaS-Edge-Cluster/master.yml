@@ -1,0 +1,13 @@
+---
+# file: master.yml
+- hosts: master
+  become: yes
+  roles:
+     - role: common
+       vars:
+          user: jindal
+          nvidia: "no"
+          proxy: "none"
+     - role: k3s-master-reset
+     - role: docker
+     - role: k3s-master

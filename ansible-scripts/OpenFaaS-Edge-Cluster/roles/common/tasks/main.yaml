@@ -1,0 +1,72 @@
+---
+# file: roles/common/tasks/main.yml
+- name: Create backup of environment variable file
+  command: mv /etc/environment /etc/environment.backup
+  become: True
+  when: proxy == "tum"
+  ignore_errors: yes
+
+- name: Creating an empty file /etc/environment
+  file:
+    path: "/etc/environment"
+    state: touch
+  become: True
+  when: proxy == "tum"
+
+- name: populate /etc/environment
+  lineinfile:
+    path: "/etc/environment"
+    state: present
+    regexp: "^{{ item.key }}="
+    line: "{{ item.key }}={{ item.value}}"
+  with_items: "{{ os_environment }}"
+  become: True
+  when: proxy == "tum"
+
+#- name: Update to environment variables
+#  shell: sed 's/^/export /' /etc/environment > /tmp/env.sh && source /tmp/env.sh
+#  when: proxy == "tum"
+
+- name: Update apt repo and cache on all Debian/Ubuntu boxes
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+- name: Upgrade all packages on servers
+  apt: upgrade=dist force_apt_get=yes
+
+- name: Install requirements
+  apt:
+    pkg:
+      - curl
+      - chrony
+
+- name: Enable service chrony
+  systemd:
+    name: chronyd
+    enabled: yes
+    state: restarted
+  ignore_errors: True
+
+- name: Enable service chrony
+  systemd:
+    name: chronyd
+    enabled: yes
+    state: restarted
+  ignore_errors: True
+
+- name: Disable ipv6 and swap
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    # reload: no
+  with_items: "{{ sysctl }}"
+# - name: Use closer mirrors
+#   blockinfile:
+#     path: /etc/apt/sources.list
+#     insertbefore: BOF
+#     block: |
+#       deb mirror://mirrors.ubuntu.com/mirrors.txt bionic main restricted universe multiverse
+#       deb mirror://mirrors.ubuntu.com/mirrors.txt bionic-updates main restricted universe multiverse
+#       deb mirror://mirrors.ubuntu.com/mirrors.txt bionic-backports main restricted universe multiverse
+#       deb mirror://mirrors.ubuntu.com/mirrors.txt bionic-security main restricted universe multiverse
+

@@ -1,0 +1,13 @@
+---
+# file: master.yml
+- hosts: master
+  become: yes
+  roles:
+     - role: k3s-master-after-join
+       vars:
+          user: jindal
+          nvidia: "no"
+          proxy: "none"
+     - role: helm
+     - role: openfaas
+     - role: monitoring

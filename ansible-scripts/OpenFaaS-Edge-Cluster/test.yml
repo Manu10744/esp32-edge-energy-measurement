@@ -1,0 +1,17 @@
+- hosts: master
+  become: yes
+  roles:
+     - role: test
+       vars:
+          user: jindal
+          nvidia: "no"
+          proxy: "none"
+
+- hosts: minion
+  become: yes
+  roles:
+     - role: test
+       vars:
+          user: faas-edge
+          nvidia: "no"
+          proxy: "tum"

@@ -1,0 +1,9 @@
+- pause: seconds=120
+- name: give edge nodes labels
+  become: "{{ user }}"
+  command: "{{ item }}"
+  with_items:
+    - kubectl label node vmschulz50 nodetype=cloud
+    - kubectl label node faas-edge1 nodetype=edge
+    - kubectl label node faasedge2 nodetype=edge
+    - kubectl label node faasedge3 nodetype=edge

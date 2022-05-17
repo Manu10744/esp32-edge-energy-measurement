@@ -15,9 +15,10 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - `prometheus-power-exporter`: Contains the resources for the prometheus exporter exposing the power consumption metrics.
 - `protobuffers`: Contains the protocolbuffer messages that are used for data transmission between the individual components over the network.
 
-#### Test utils
+#### Utils
 - `test-utils`: scripts and utilities to test functionality, especially the resources needed for a local kubernetes cluster needed for testing.
 - `openfaas-functions`: Contains the serverless function(s) for OpenFaaS to apply for tests.
+- `ansible-scripts`: Contains ansible scripts that can be used for creating an OpenFaaS edge cluster and installing the necessary tools on each node automatically.
 
 #
 

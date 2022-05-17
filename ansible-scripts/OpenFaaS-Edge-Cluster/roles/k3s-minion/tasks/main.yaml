@@ -1,0 +1,24 @@
+- name: Uninstall old packages
+  become: True
+  apt:
+    state: absent
+    pkg:
+      - kubelet
+      - kubeadm
+      - kubernetes-cni
+  ignore_errors: True
+
+- name: Copy join command to host
+  become: True
+  copy:
+    src: "{{ playbook_dir }}/from_remote/join-command"
+    dest: $PWD/join-command.sh
+    mode: 0777
+  register: result
+  until: result is not failed
+  retries: 36 # Wait up to 3 min for the file to be created
+  delay: 5
+
+- name: Join cluster
+  become: True
+  command: sh $PWD/join-command.sh
