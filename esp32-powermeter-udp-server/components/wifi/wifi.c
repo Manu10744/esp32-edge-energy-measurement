@@ -57,8 +57,8 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 /**
  * Connects the ESP32 to a WiFi Access Point.
  * 
- * WiFi SSID and password are derived from the configured WiFi settings
- * in the project configuration.
+ * WiFi SSID and password are derived from the preconfigured WiFi settings
+ * chosen in the project configuration.
  */
 void connect_to_wifi(void) {
     // Initialize NVS

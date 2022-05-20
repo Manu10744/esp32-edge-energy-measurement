@@ -17,5 +17,5 @@ menu "WiFi Connection Settings"
         range 0 10
         default 3
         help
-            How many connection retries should be executed?
+            How many connection retries should be executed if the connection to the WiFi AP does not succeed at the first attempt?
 endmenu

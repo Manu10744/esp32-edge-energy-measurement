@@ -15,15 +15,36 @@ menu "UDP Server Configuration"
     config PORT
         int "Port"
         range 0 65535
-        default 3333
+        default 30000
         help
-            Port of the UDP server.
+            Which Port should be used for the UDP server?
 
     config MAX_CLIENTS
         int "Maximum amount of clients"
         range 0 16
         default 6
         help
-            Maximum amount of clients that are served.
+            How many clients should be accepted by the UDP server?
+
+    config SEND_INTERVAL
+        int "Power measurement message transmission interval in ms (milli-seconds)"
+        default 1000
+        help
+            Sets the time interval that is used for sending power measurements to a client.
             
+endmenu
+
+menu "SSD1306 Display Configuration"
+
+    config USE_SSD1306_DISPLAY
+        bool "Use a SSD1306 display"
+        default y
+        help
+            Should the power measurements be visualized by the SSD1306 display? Disable this if no display is available.
+    
+    config DISPLAY_REFRESH_INTERVAL
+        int "Refresh interval for the display in ms (milli-seconds)"
+        default 500
+        help
+            Sets the time interval that is used for refreshing the SSD1306 display.
 endmenu

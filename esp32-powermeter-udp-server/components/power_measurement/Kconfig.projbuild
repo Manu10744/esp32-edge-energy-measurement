@@ -1,9 +1,15 @@
 menu "Power Measurement Settings"
     
-    config AMOUNT_OF_CHANNELS
-        int "Amount of available channels"
-        default 3
+    config AMOUNT_OF_INA3221_SENSORS
+        int "Amount of used INA3221 sensors"
+        default 2
         help 
-            How many INA3221 channels are available?
+            How many INA3221 sensors are used?
+    
+    config MEASUREMENT_INTERVAL
+        int "INA3221 channel measurement interval in ms (milli-seconds)"
+        default 10
+        help
+            Sets the time interval that is used for the power measurement of each INA3221 channel. Lower values achieve a higher precision, but cause more computational effort.
 
 endmenu

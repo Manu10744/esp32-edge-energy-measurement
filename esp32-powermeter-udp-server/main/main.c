@@ -5,21 +5,23 @@
 #include "sdkconfig.h"
 #include "esp_log.h"
 #include "lwip/sockets.h"
+#include <ssd1306.h>
 
 #include "wifi.h"
 #include "power_measurement.h"
 
-#define AMOUNT_OF_CHANNELS CONFIG_AMOUNT_OF_CHANNELS
+#define USE_DISPLAY CONFIG_USE_SSD1306_DISPLAY
 
 #define PORT CONFIG_PORT
 #define MAX_CLIENTS CONFIG_MAX_CLIENTS
 
 #define RECEIVE_BUFFER_SIZE 16
-#define SEND_INTERVAL_MS 1000
+#define SEND_INTERVAL_MS CONFIG_SEND_INTERVAL
 
 static void serve_client(void *task_param);
 static bool validate_request(char received_data[]);
 static void start_udp_server(void *task_param);
+static void show_measurements(void *task_param);
 
 /**
  * Structure containing the relevant information about a client connection.
@@ -44,10 +46,16 @@ void app_main(void) {
     // Step 1: Establish a WiFi connection
     connect_to_wifi();
 
-    // Step 2: Start power measurement
+#ifdef CONFIG_USE_SSD1306_DISPLAY
+    // Step 2: Activate SSD1306 display
+    ESP_LOGI(TAG, "Using the SSD1306 display!");
+    xTaskCreate(show_measurements, "display_power_measurements", configMINIMAL_STACK_SIZE * 8, NULL, 2, NULL);
+#endif
+
+    // Step 3: Start power measurement
     xTaskCreate(start_power_measurements, "ina3221_power_measurement", configMINIMAL_STACK_SIZE * 8, NULL, 2, NULL);
 
-    // Step 3: Start UDP server and listen for connections
+    // Step 4: Start UDP server and listen for connections
 #ifdef CONFIG_USE_IPV4_STACK
     ESP_LOGI(TAG, "Using IPv4 stack for UDP server socket!");
     xTaskCreate(start_udp_server, "udp_server", 4096, (void*)AF_INET, 5, NULL);
@@ -183,7 +191,7 @@ static void serve_client(void *task_param) {
 
     ESP_LOGI(TAG, "Starting to serve client requesting channel %d", client.requested_channel);
     while (1) {
-        PowerMeasurement measurement = get_measurement(client.requested_channel - 1);
+        PowerMeasurement measurement = get_measurement(client.requested_channel);
         tx_data_len = power_measurement__get_packed_size(&measurement);
         tx_buffer = malloc(tx_data_len);
         power_measurement__pack(&measurement, tx_buffer);
@@ -205,9 +213,9 @@ static void serve_client(void *task_param) {
  * Validates a power measurement subscription request received from a client UDP 
  * message. 
  * 
- * In order to be valid, the request data must be a string representing a valid
- * INA3221 channel - meaning that it must be successfully converted to an integer
- * and must represent a valid INA3221 channel.
+ * In order to be valid, the received data must be a string representing a valid
+ * INA3221 channel - meaning that it must be successfully converted to a positive integer
+ * representing a valid INA3221 channel.
  * 
  * @param received_data the buffer containing the received data.
  * @return true if the request is valid, otherwise false.
@@ -218,6 +226,7 @@ static bool validate_request(char received_data[]) {
     char *endptr = NULL; 
     long requested_channel = strtol(received_data, &endptr, 10);
 
+    uint8_t available_channels = get_amount_of_channels();
     if (received_data == endptr) {
         ESP_LOGW(TAG, "Client subscription request for channel '%ld' is invalid - no channel ID is present in the request!",
                 requested_channel);
@@ -226,9 +235,9 @@ static bool validate_request(char received_data[]) {
         ESP_LOGW(TAG, "Client subscription request for channel '%ld' is invalid - channel ID must be purely numeric!",
                 requested_channel);
         return false;
-    } else if (requested_channel < 1 || requested_channel > AMOUNT_OF_CHANNELS) {
+    } else if (requested_channel < 1 || requested_channel > available_channels) {
         ESP_LOGW(TAG, "Client subscription request for channel '%ld' is invalid - channel ID must be inside interval of 1 <= requested channel <= %d", 
-                requested_channel, AMOUNT_OF_CHANNELS);
+                requested_channel, available_channels);
         return false;
     } else if (errno != 0 && requested_channel == 0) {
         ESP_LOGW(TAG, "Client subscription request for channel '%ld' is invalid - unexpected error occurred!", 
@@ -237,4 +246,45 @@ static bool validate_request(char received_data[]) {
     }
 
     return errno == 0 && received_data && !*endptr;
+}
+
+
+/**
+ * Displays the power measurements of the individual INA3221 channels on the SSD1306 display.
+ * Standard pins are assumed to be used for the connection of the display via I2C.
+ * 
+ * This function should be handed to xTaskCreate() in order to start operating the
+ * display in a dedicated task.
+ * 
+ * @param task_param pointer to the task's parameter. In this case, no parameter is used.
+ */
+static void show_measurements(void *task_param) {
+    char buffer[200];
+
+    ESP_LOGI(TAG, "Initializing SSD1306 display ...");
+    ssd1306_128x64_i2c_init();
+    ssd1306_128x64_init();
+    ssd1306_setFixedFont(ssd1306xled_font6x8);
+    ssd1306_clearScreen();
+
+    sprintf(buffer, "Hello :)");
+    ssd1306_printFixedN(0, 0, buffer, STYLE_NORMAL, 2);
+
+    uint8_t available_channels = get_amount_of_channels();
+    while (1) {
+        for (uint8_t channel = 1; channel <= available_channels; channel++) {
+            PowerMeasurement curr_measurement = get_measurement(channel);
+
+            ssd1306_clearScreen();
+
+            sprintf(buffer, "Channel %d", channel);
+            ssd1306_printFixedN(0, 0, buffer, STYLE_NORMAL, 0);
+            sprintf(buffer, "%0.01f mAs", curr_measurement.energy_consumption);
+            ssd1306_printFixedN(0, 20, buffer, STYLE_NORMAL, 0);
+            sprintf(buffer, "%.01f mA", curr_measurement.current);
+            ssd1306_printFixedN(0, 40, buffer, STYLE_NORMAL, 0);
+
+            vTaskDelay(pdMS_TO_TICKS(500));
+        }
+    }
 }
