@@ -19,28 +19,28 @@
     mode: "0755"
 
 - name: Copy config file to non-root user directory
+  become: True
   copy:
     remote_src: yes
     src: /etc/rancher/k3s/k3s.yaml
     dest: $PWD/.kube/config
     owner: "{{ user }}"
     mode: 0600
-  become: True
 
 - name: Fetch config
+  become: True
   fetch:
     src: /etc/rancher/k3s/k3s.yaml
     dest: from_remote/kubeconfig.conf
-  become: True
 
 - name: Check for taint
-  become: "{{ user }}"
+  become: True
   shell: kubectl describe node {{ ansible_hostname }} | grep "node-role.kubernetes.io/master:NoSchedule"
   register: hasTaint
   ignore_errors: True
 
 - name: Remove the taint from master
-  become: "{{ user }}"
+  become: True
   command: kubectl taint node {{ ansible_hostname }} node-role.kubernetes.io/master-
   when: hasTaint is succeeded
 
@@ -51,7 +51,7 @@
     dest: $PWD/my_openfaas/
 
 - name: Install K8s dashboard
-  become: "{{ user }}"
+  become: True
   command: "{{ item }}"
   with_items:
    - kubectl apply -f my_openfaas/dashboard.yaml

@@ -46,13 +46,6 @@
     state: restarted
   ignore_errors: True
 
-- name: Enable service chrony
-  systemd:
-    name: chronyd
-    enabled: yes
-    state: restarted
-  ignore_errors: True
-
 - name: Disable ipv6 and swap
   sysctl:
     name: "{{ item.name }}"
@@ -60,6 +53,7 @@
     state: present
     # reload: no
   with_items: "{{ sysctl }}"
+
 # - name: Use closer mirrors
 #   blockinfile:
 #     path: /etc/apt/sources.list

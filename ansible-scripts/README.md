@@ -41,4 +41,7 @@ ansible-playbook <playbook_name>.yml
 
 # With using become (this will ask for become user password)
 ansible-playbook --ask-become-pass <playbook_name>.yml
+
+# Execute playbook at a certain task (usually with the failed one from previous run)
+ansible-playbook <playbook_name>.yaml --start-at-task="<task_name>"
 ```

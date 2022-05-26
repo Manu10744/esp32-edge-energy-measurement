@@ -5,8 +5,8 @@
   roles:
      - role: common
        vars:
-          user: jindal
-          nvidia: "no"
+          user: faas-edge-master
+          nvidia: "yes"
           proxy: "none"
      - role: k3s-master-reset
      - role: docker

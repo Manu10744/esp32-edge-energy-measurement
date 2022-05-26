@@ -19,8 +19,13 @@
       - gnupg-agent
       - software-properties-common
 
-#- name: Add a GPG key
-#  shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+- name: Delete GPG key if exists
+  become: True
+  shell: rm /usr/share/keyrings/docker-archive-keyring.gpg
+  ignore_errors: yes
+
+- name: Add a GPG key
+  shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
 - name: Get DEB architecture
   shell: dpkg --print-architecture

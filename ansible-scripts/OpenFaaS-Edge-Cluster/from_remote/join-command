@@ -1,1 +1,0 @@
-curl -sfL https://get.k3s.io | K3S_URL=https://131.159.35.140:6443 K3S_TOKEN=K1019b65bb1cdc0af822962df020b8289d26ee2c0e850db74cef9f64d0dcab12d42::server:648165d5dddee60200180f57c5c3ec7e sh -
