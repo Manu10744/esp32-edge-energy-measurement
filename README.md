@@ -28,6 +28,8 @@ The power consumption measurements are carried out by a ESP32 powermeter.
 - [INA3221 Strommessung](https://www.raspberry-pi-geek.de/ausgaben/rpg/2019/02/strom-und-spannungssensor-ina3221/)
 - [Prometheus metric types](https://prometheus.io/docs/concepts/metric_types/#summary)
 - [Protobuffers](https://developers.google.com/protocol-buffers/docs/proto3)
+
+
 #
 
 ### TO-DOs

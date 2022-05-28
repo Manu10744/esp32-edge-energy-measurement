@@ -12,12 +12,12 @@ minion:
       ansible_host: 192.168.178.46
       ansible_user: faas-edge-worker
       ansible_ssh_pass: password
-    odroid-xu4-1:
+    odroid-xu4-board3:
       ansible_connection: ssh
       ansible_host: 192.168.178.39
       ansible_user: faas-edge-worker
       ansible_ssh_pass: password
-    odroid-xu4-2:
+    odroid-xu4-board2:
       ansible_connection: ssh
       ansible_host: 192.168.178.44
       ansible_user: faas-edge-worker

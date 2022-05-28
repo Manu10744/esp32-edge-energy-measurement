@@ -5,20 +5,12 @@
   roles:
      - role: common
        vars:
-          user: faas-edge
-          nvidia: "yes"
-          proxy: "tum"
+          user: faas-edge-worker
+          nvidia: "no"
+          proxy: "none"
           os_environment:
             - key: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
-            - key: http_proxy
-              value: http://proxy.in.tum.de:8080/
-            - key: https_proxy
-              value: http://proxy.in.tum.de:8080/
-            - key: ftp_proxy
-              value: ftp://proxy.in.tum.de:8080/
-            - key: no_proxy
-              value: localhost,127.0.0.1,127.0.0.1,172.24.65.0/24,10.244.0.0/16,10.96.0.0/12,131.159.35.140
      - role: k3s-minion-reset
      - role: docker
      - role: k3s-minion
