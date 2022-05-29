@@ -50,7 +50,7 @@ sudo usermod -aG sudo <username>
 # Execute playbook
 ansible-playbook <playbook_name>.yml
 
-# Ask for become-password if running with become-mode is enabled
+# Ask for become-password used for the tasks running in become-mode
 ansible-playbook --ask-become-pass <playbook_name>.yml
 
 # Execute playbook at a certain task (usually with the failed one from previous run)
@@ -58,6 +58,9 @@ ansible-playbook <playbook_name>.yaml --start-at-task="<task_name>"
 
 # Limit playbook to one specific host
 ansible-playbook --limit=<host_name> <playbook_name>.yml
+
+# Use another hosts file
+ansible-playbook -i <alternative_hosts_file>.yml <playbook_name>.yml
 ```
 
 #### Ping all configured hosts
@@ -90,13 +93,26 @@ cgroup_memory=1 cgroup_enable=memory
 
 <br>
 
-- Docker installation fails on Google Coral Dev Board:<br>
-Instructions can be found in https://github.com/f0cal/google-coral/issues/32
+- Docker installation (`docker-ce docker-ce-cli containerd.io`) fails on Google Coral Dev Board:<br>
+Could make docker run using the following code (found in https://github.com/f0cal/google-coral/issues/32)
+
+```bash
+sudo apt-get install apt-transport-https ca-certificates curl gnupg2 software-properties-common
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+echo "deb [arch=arm64] https://download.docker.com/linux/debian buster stable" | sudo tee /etc/apt/sources.list.d/docker.list
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io
+sudo groupadd docker
+sudo usermod -aG docker $USER
+sudo reboot now
+```
 
 <br>
 
 - Can't install `docker` using the usual approach on PYNQ-Z1<br>
-Instructions can be found in https://discuss.pynq.io/t/docker-xilinx-platforms-pynq/1962
+Either use `bionic` for the docker apt repository or install docker as described in https://discuss.pynq.io/t/docker-xilinx-platforms-pynq/1962
+
+<br>
 
 - `dockerd` cannot start on ODROID-XU4, it fails with:
 ```bash
@@ -116,9 +132,32 @@ Jul 14 18:23:13 iconlap02 systemd[1]: docker.service: Unit entered failed state.
 Jul 14 18:23:13 iconlap02 systemd[1]: docker.service: Failed with result 'exit-code'.
 ```
 
-Could not make it work with the official Ubuntu 18.04 image provided by `wiki.odroid.com`. Installing an `Armbian` Image for ODROID-XU4 (`Armbian_20.08.1_Odroidxu4_bionic_legacy_4.14.195`) solved it.
+Could not make docker run with the official Ubuntu 18.04 image provided by `wiki.odroid.com`. Installing an `Armbian` Image for ODROID-XU4 (e.g. `Armbian_20.08.1_Odroidxu4_bionic_legacy_4.14.195`) solved it.
 
 <br> 
 
-- `sudo apt upgrade` fails on ODROID-XU4 after executing `sudo apt update` when running the Armbian image due to certificate verification errors
+- `sudo apt upgrade` fails on ODROID-XU4 after executing `sudo apt update` due to certificate verification errors.<br>
 Can be fixed by executing ´sudo apt install ca-certificates` beforehand.
+
+<br>
+
+- ODROID-XU4 cannot join the k3s cluster because kernel option `CGROUP_PIDS` is not enabled and k3s depends on it (See also https://forum.odroid.com/viewtopic.php?t=37533).<br>
+Fixed by upgrading the `Armbian` image to `Armbian_21.08.3_Odroidxu4_bullseye_current_5.4.151`.
+
+<br>
+
+- k3s agent on ODROID-XU4 fails with error message `Kernel-module mismatch- iptables/1.8.2 Failed to initialize nft: Protocol not supported`.<br>
+Occured after updating the `Armbian` image. This problem seems to be caused due to kernel update, can be fixed by rebooting: `sudo reboot`.
+
+<br>
+
+- Task `Add repository for docker` in ansible-role `docker` fails with error message `Failed to update apt cache: E:The repository 'https://download.docker.com/linux/ubuntu <...> Release' does not have a Release file.`<br>
+Observed on:
+    - Raspberry Pi
+    - Coral Dev Board
+    - PYNQ-Z1
+    - ODROID-XU4
+    <br>
+    <br>
+Solution: Use bionic instead of `{{ ansible_lsb.codename }}` in the command.
+Solves the problem for: PYNQ-Z1, Raspberry Pi, ODROID-XU4. For a solution for the Coral Dev Board see above.

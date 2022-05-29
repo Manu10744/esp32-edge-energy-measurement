@@ -11,6 +11,6 @@
           os_environment:
             - key: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
-     - role: k3s-minion-reset
      - role: docker
+     - role: k3s-minion-reset
      - role: k3s-minion
