@@ -6,14 +6,14 @@
 
 
 - name: Install Monitoring setup
-  become: "{{ user }}"
+  become: True
   command: "{{ item }}"
   with_items:
    - kubectl apply --server-side -f my_openfaas/manifests/setup
 
 - pause: seconds=20
 - name: Install Monitoring components
-  become: "{{ user }}"
+  become: True
   command: "{{ item }}"
   with_items:
    - kubectl apply -f my_openfaas/manifests/

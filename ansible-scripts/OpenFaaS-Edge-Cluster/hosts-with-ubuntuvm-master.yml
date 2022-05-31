@@ -2,7 +2,7 @@ master:
   hosts:
     ubuntu-vm:
       ansible_connection: ssh
-      ansible_host: 192.168.178.51
+      ansible_host: 192.168.178.52
       ansible_user: faas-edge-master
       ansible_ssh_pass: password
 minion:
@@ -31,4 +31,9 @@ minion:
       ansible_connection: ssh
       ansible_host: 192.168.178.45
       ansible_user: faas-edge-worker
+      ansible_ssh_pass: password
+    jetson-nano:
+      ansible_connection: ssh
+      ansible_host: 192.168.178.59
+      ansible_user: faas-edge-master
       ansible_ssh_pass: password

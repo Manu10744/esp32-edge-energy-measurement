@@ -35,12 +35,20 @@ sudo useradd -m <username>
 passwd <username>
 ```
 
-## Step 3: Add user to sudoers
+### Step 3: Add user to sudoers
 Usually, many automation tasks done with Ansible require root privileges. Ansible can do that by switching to a privileged user after connection via SSH, which can be done by using the `become` directive.
 
 ```bash
 sudo usermod -aG sudo <username>
 ```
+
+<br>
+
+## Usage
+1. Execute the playbook `master.yml` which sets up docker and k3s on the master node(s). At the end of the process, there will be a generated `join-command` in the folder `from_remote` that can be used on other nodes to join the cluster.
+2. Execute the playbook `minion.yml` to setup docker and k3s agents on the configured worker nodes. At the end of the process, each node will join the cluster by using the generated `join-command` in Step 1.
+3. Execute the playbook `master-after-join.yml` in order to deploy OpenFaaS and the monitoring stack to the cluster.
+
 
 #
 
@@ -82,7 +90,7 @@ sudo usermod -aG docker $USER
 sudo chmod 666 /var/run/docker.sock
 ```
 
-#
+<br>
 
 ## Troubleshooting
 - Raspberry Pi fails to join k3s cluster with error message `Failed to find memory cgroup`:<br>

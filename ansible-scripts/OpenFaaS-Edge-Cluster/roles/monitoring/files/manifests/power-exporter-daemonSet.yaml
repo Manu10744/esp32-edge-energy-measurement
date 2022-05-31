@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app.kubernetes.io/component: exporter
+    app.kubernetes.io/name: power-exporter
+    app.kubernetes.io/part-of: kube-prometheus
+    app.kubernetes.io/version: 1.0.0
+  name: power-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: exporter
+      app.kubernetes.io/name: power-exporter
+      app.kubernetes.io/part-of: kube-prometheus
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: power-exporter
+      labels:
+        app.kubernetes.io/component: exporter
+        app.kubernetes.io/name: power-exporter
+        app.kubernetes.io/part-of: kube-prometheus
+        app.kubernetes.io/version: 1.0.0
+    spec:
+      containers:
+      - env:
+        - name: DEVICE_UDP_IP
+          value: 127.0.0.1
+        - name: DEVICE_UDP_PORT
+          value: "5000"
+        image: phyz1x/prometheus-power-exporter:1.0.0
+        name: power-exporter
+        ports:
+        - containerPort: 8000
+          name: http
+        resources:
+          limits:
+            cpu: 250m
+            memory: 180Mi
+          requests:
+            cpu: 102m
+            memory: 180Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - SYS_TIME
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+      - env:
+        - name: NODENAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: POWERMONITORING_CONFIG_PATH
+          value: /config/power-monitoring.conf
+        image: phyz1x/powermeasurement-udp-client:1.0.0
+        name: powermeasurement-udp-client
+        ports:
+        - containerPort: 5000
+          name: http
+        resources:
+          limits:
+            cpu: 250m
+            memory: 180Mi
+          requests:
+            cpu: 102m
+            memory: 180Mi
+        volumeMounts:
+        - mountPath: /config/
+          name: power-monitoring-config
+          readOnly: true
+      hostNetwork: true
+      hostPID: true
+      nodeSelector:
+        kubernetes.io/os: linux
+      priorityClassName: system-cluster-critical
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      tolerations:
+      - operator: Exists
+      volumes:
+      - configMap:
+          items:
+          - key: power-monitoring.conf
+            path: power-monitoring.conf
+          name: power-monitoring-config
+        name: power-monitoring-config

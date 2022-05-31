@@ -7,26 +7,26 @@
     - "{{ role_path }}/files/*"
 
 - name: Install Openfaas Namespaces
-  become: "{{ user }}"
+  become: True
   command: "{{ item }}"
   with_items:
    - kubectl apply -f my_openfaas/namespaces.yaml
 
 - name: Install Openfaas
-  become: "{{ user }}"
+  become: True
   command: "{{ item }}"
   with_items:
    - kubectl apply -f my_openfaas/openfaas.yaml
 
 - name: Generate OpenFaaS password
-  become: yes
+  become: True
   become_user: "{{ user }}"
   shell: kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 -d
   register: openfaas_password
 
 - name: Copy password to local file
-  become: false
-  local_action: copy content="{{ openfaas_password.stdout_lines[0] }}" dest="./from_remote/openfass-password"
+  become: True
+  local_action: copy content="{{ openfaas_password.stdout_lines[0] }}" dest="./from_remote/openfaas-password"
 
 #- name: Install Openfaas
 #  become: "{{ user }}"

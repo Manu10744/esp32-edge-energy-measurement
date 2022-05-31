@@ -1,3 +1,4 @@
 # Ignore generated files with secrets
 join-command
+openfaas-password
 kubeconfig.conf/**
