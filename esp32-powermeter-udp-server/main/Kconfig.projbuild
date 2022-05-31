@@ -19,13 +19,6 @@ menu "UDP Server Configuration"
         help
             Which Port should be used for the UDP server?
 
-    config MAX_CLIENTS
-        int "Maximum amount of clients"
-        range 0 16
-        default 6
-        help
-            How many clients should be accepted by the UDP server?
-
     config SEND_INTERVAL
         int "Power measurement message transmission interval in ms (milli-seconds)"
         default 1000

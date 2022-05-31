@@ -11,10 +11,9 @@
 #include "power_measurement.h"
 
 #define USE_DISPLAY CONFIG_USE_SSD1306_DISPLAY
+#define DISPLAY_REFRESH_INTERVAL CONFIG_DISPLAY_REFRESH_INTERVAL
 
 #define PORT CONFIG_PORT
-#define MAX_CLIENTS CONFIG_MAX_CLIENTS
-
 #define RECEIVE_BUFFER_SIZE 16
 #define SEND_INTERVAL_MS CONFIG_SEND_INTERVAL
 
@@ -148,10 +147,8 @@ static void start_udp_server(void *task_param) {
             rx_buffer[rx_data_len] = '\0';
             ESP_LOGI(TAG, "Received %d bytes from %s: %s", rx_data_len, addr_str, rx_buffer);
 
-            if (validate_request(rx_buffer) && accepted_clients < MAX_CLIENTS) {
-                accepted_clients++;
+            if (validate_request(rx_buffer)) {
                 int requested_channel = strtol(rx_buffer, NULL, 10);
-                ESP_LOGI(TAG, "[%d/%d] Accepting a new client requesting channel %d.", accepted_clients, MAX_CLIENTS, requested_channel);
 
                 static struct client_info new_client;
                 new_client.requested_channel = requested_channel;
@@ -197,15 +194,17 @@ static void serve_client(void *task_param) {
         power_measurement__pack(&measurement, tx_buffer);
 
         int err = sendto(server_socket, tx_buffer, tx_data_len, 0, (struct sockaddr *)&client.sockaddr, client.socklen);
+        free(tx_buffer);
+
         if (err < 0) {
             ESP_LOGE(TAG, "Error occurred during sending data to client requesting channel %d: errno %d", errno, client.requested_channel);
             break;
         }
+
         vTaskDelay(pdMS_TO_TICKS(SEND_INTERVAL_MS));
     }
 
     ESP_LOGI(TAG, "Deleting task of client that's subscripted to channel %d", client.requested_channel);
-    free(tx_buffer);
     vTaskDelete(NULL);
 }
 
@@ -279,12 +278,13 @@ static void show_measurements(void *task_param) {
 
             sprintf(buffer, "Channel %d", channel);
             ssd1306_printFixedN(0, 0, buffer, STYLE_NORMAL, 0);
+            
             sprintf(buffer, "%0.01f mAs", curr_measurement.energy_consumption);
             ssd1306_printFixedN(0, 20, buffer, STYLE_NORMAL, 0);
             sprintf(buffer, "%.01f mA", curr_measurement.current);
             ssd1306_printFixedN(0, 40, buffer, STYLE_NORMAL, 0);
 
-            vTaskDelay(pdMS_TO_TICKS(500));
+            vTaskDelay(pdMS_TO_TICKS(DISPLAY_REFRESH_INTERVAL));
         }
     }
 }

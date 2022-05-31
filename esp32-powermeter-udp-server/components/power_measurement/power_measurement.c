@@ -27,14 +27,14 @@ static ina3221_channel_t get_channel(uint8_t requested_channel);
 
 static const char *TAG = "POWER_MEASUREMENT";
 
-static ina3221_t ina3221_1 = {
-    .shunt = {100, 100, 50}, 
+static ina3221_t ina3221_vs = {
+    .shunt = {100, 100, 100}, 
     .config.config_register = INA3221_DEFAULT_CONFIG,
     .mask.mask_register = INA3221_DEFAULT_MASK
 };
 
-static ina3221_t ina3221_2 = {
-    .shunt = {100, 100, 50},
+static ina3221_t ina3221_gnd = {
+    .shunt = {100, 100, 100},
     .config.config_register = INA3221_DEFAULT_CONFIG,
     .mask.mask_register = INA3221_DEFAULT_MASK
 };
@@ -57,12 +57,12 @@ void start_power_measurements(void *task_param) {
     ESP_ERROR_CHECK(i2cdev_init());
 
     ESP_LOGI(TAG, "Initializing INA3221 sensor (VS) ...");
-    init_ina3221(&ina3221_1, INA3221_I2C_ADDR_VS); 
+    init_ina3221(&ina3221_vs, INA3221_I2C_ADDR_VS); 
     ESP_LOGI(TAG, "Initializing INA3221 sensor (GND) ...");
-    init_ina3221(&ina3221_2, INA3221_I2C_ADDR_GND);
+    init_ina3221(&ina3221_gnd, INA3221_I2C_ADDR_GND);
 
-    ina3221_sensors[0] = ina3221_1;
-    ina3221_sensors[1] = ina3221_2;
+    ina3221_sensors[0] = ina3221_vs;
+    ina3221_sensors[1] = ina3221_gnd;
 
     init_measurements();
     ESP_LOGI(TAG, "Initialization finished!");
