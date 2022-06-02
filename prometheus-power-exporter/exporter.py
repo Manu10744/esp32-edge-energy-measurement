@@ -73,7 +73,7 @@ def fetch_data(ip: str, port: int) -> None:
 
         ready = select.select([sock], [], [], DEVICE_FETCH_DATA_TIMEOUT_SECONDS)
         if ready[0]:
-            rx_data, address = sock.recv(rx_buffer_size)
+            rx_data, address = sock.recvfrom(rx_buffer_size)
             sender_ip, sender_port = address
             logger.info("Received {} bytes from {}:{}".format(len(rx_data), sender_ip, sender_port))
 
