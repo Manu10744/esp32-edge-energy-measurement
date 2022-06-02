@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: monitoring
+  name: power-monitoring-config
+data:
+ power-monitoring.conf: |
+        node raspberrypi {
+            powermeter_server = "127.0.0.1"
+            powermeter_port = 10000
+            channel = 1
+        }
+
+        node pynq {
+            powermeter_server = "127.0.0.1"
+            powermeter_port = 10000
+            channel = 2
+        }
+
+        node odroidxu4-1 {
+            powermeter_server = "127.0.0.1"
+            powermeter_port = 10000
+            channel = 3
+        }
+
+        node odroidxu4-2 {
+            powermeter_server = "127.0.0.1"
+            powermeter_port = 10000
+            channel = 4
+        }
+
+        node coral-dev-board {
+            powermeter_server = "127.0.0.1"
+            powermeter_port = 10000
+            channel = 5
+        }
+
+        node jetson-nano {
+            powermeter_server = "127.0.0.1"
+            powermeter_port = 10000
+            channel = 6
+        }
