@@ -4,6 +4,7 @@ import logging
 import sys
 import os
 import socket
+import select
 
 from powermeasurement import PowerMeasurement
 from power_metrics import update_metrics
@@ -12,8 +13,8 @@ from typing import Tuple
 
 logger = logging.getLogger(__name__)
 
-
 DEVICE_FETCH_DATA_INTERVAL_SECONDS = 3
+DEVICE_FETCH_DATA_TIMEOUT_SECONDS = 5
 HTTP_SERVER_PORT = 8000
 
 ENV_VAR_DEVICE_IP = 'DEVICE_UDP_IP'
@@ -66,20 +67,23 @@ def fetch_data(ip: str, port: int) -> None:
     sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     logger.info("Successfully created socket.")
 
-    logger.info("Starting UDP communication with target device (IP: {} | Port: {} ...".format(ip, port))
+    logger.info("Starting UDP communication with target device (IP: {} | Port: {}) ...".format(ip, port))
     while True:
         sock.sendto(request_msg, (ip, port))
 
-        rx_data, address = sock.recvfrom(rx_buffer_size)
-        sender_ip, sender_port = address
-        logger.info("Received {} bytes from {}:{}".format(len(rx_data), sender_ip, sender_port))
+        ready = select.select([sock], [], [], DEVICE_FETCH_DATA_TIMEOUT_SECONDS)
+        if ready[0]:
+            rx_data, address = sock.recv(rx_buffer_size)
+            sender_ip, sender_port = address
+            logger.info("Received {} bytes from {}:{}".format(len(rx_data), sender_ip, sender_port))
 
-        measurement = PowerMeasurement().parse(rx_data)
-        logger.info(measurement)
+            measurement = PowerMeasurement().parse(rx_data)
+            logger.info(measurement)
 
-        update_metrics(measurement)
-
-        time.sleep(DEVICE_FETCH_DATA_INTERVAL_SECONDS)
+            update_metrics(measurement)
+            time.sleep(DEVICE_FETCH_DATA_INTERVAL_SECONDS)
+        else: 
+            logger.warning("Timeout occured on socket recvfrom! Requesting data from target device again.")
 
 
 if __name__ == '__main__':
