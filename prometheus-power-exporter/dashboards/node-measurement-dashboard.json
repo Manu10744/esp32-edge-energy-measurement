@@ -18,11 +18,12 @@
       }
     ]
   },
+  "description": "Dashboard for all power consumption related metrics.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 26,
-  "iteration": 1651696663050,
+  "iteration": 1654532319632,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -31,6 +32,7 @@
         "type": "prometheus",
         "uid": "P1809F7CD0C75ACF3"
       },
+      "description": "The total amount of power consumed, given in ampere-seconds.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -64,7 +66,9 @@
               "mode": "off"
             }
           },
+          "displayName": "$powerexporter_selected_node",
           "mappings": [],
+          "noValue": "No Data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -82,7 +86,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 10,
         "w": 12,
         "x": 0,
         "y": 0
@@ -106,7 +110,7 @@
             "uid": "P1809F7CD0C75ACF3"
           },
           "exemplar": true,
-          "expr": "powerexporter_power_consumption_ampere_seconds_total{}",
+          "expr": "powerexporter_power_consumption_ampere_seconds_total{instance=\"$powerexporter_selected_node\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -120,10 +124,12 @@
         "type": "prometheus",
         "uid": "P1809F7CD0C75ACF3"
       },
+      "description": "The consumed electrical current, given in ampere.",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "palette-classic",
+            "seriesBy": "last"
           },
           "custom": {
             "axisLabel": "Ampere",
@@ -153,17 +159,15 @@
               "mode": "off"
             }
           },
+          "displayName": "$powerexporter_selected_node",
           "mappings": [],
+          "noValue": "No Data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
@@ -176,7 +180,7 @@
               "options": {
                 "mode": "exclude",
                 "names": [
-                  "powerexporter_current_ampere{container=\"power-exporter\", endpoint=\"http\", instance=\"cloud-master-01\", job=\"power-exporter\", namespace=\"monitoring\", pod=\"power-exporter-flz49\", service=\"power-exporter\"}"
+                  "cloud-master-01"
                 ],
                 "prefix": "All except:",
                 "readOnly": true
@@ -196,7 +200,7 @@
         ]
       },
       "gridPos": {
-        "h": 9,
+        "h": 10,
         "w": 12,
         "x": 12,
         "y": 0
@@ -220,7 +224,8 @@
             "uid": "P1809F7CD0C75ACF3"
           },
           "exemplar": true,
-          "expr": "powerexporter_current_ampere{}",
+          "expr": "powerexporter_current_ampere{instance=\"$powerexporter_selected_node\"}",
+          "format": "time_series",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -234,6 +239,7 @@
         "type": "prometheus",
         "uid": "P1809F7CD0C75ACF3"
       },
+      "description": "The most recent power consumption given in ampere-seconds, determined by calculating the difference between the most recent and the previous data point.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -267,7 +273,9 @@
               "mode": "off"
             }
           },
+          "displayName": "$powerexporter_selected_node",
           "mappings": [],
+          "noValue": "No Data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -285,10 +293,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 10,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 10
       },
       "id": 6,
       "options": {
@@ -309,13 +317,15 @@
             "uid": "P1809F7CD0C75ACF3"
           },
           "exemplar": true,
-          "expr": "idelta(sum(powerexporter_power_consumption_ampere_seconds_total)[30m:15s]) >= 0",
+          "expr": "idelta(sum(powerexporter_power_consumption_ampere_seconds_total{instance=\"$powerexporter_selected_node\"})[30m:15s]) >= 0",
+          "format": "time_series",
+          "instant": false,
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "Increase in Power Consumption",
+      "title": "Power Consumption",
       "type": "timeseries"
     },
     {
@@ -323,6 +333,7 @@
         "type": "prometheus",
         "uid": "P1809F7CD0C75ACF3"
       },
+      "description": "The average of the current consumption over the past 30 minutes, given in ampere.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -344,7 +355,9 @@
               "type": "linear"
             }
           },
+          "displayName": "${__field.labels.instance}",
           "mappings": [],
+          "noValue": "No Data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -362,10 +375,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 10,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 10
       },
       "id": 8,
       "options": {
@@ -377,7 +390,7 @@
           "displayMode": "list",
           "placement": "bottom"
         },
-        "orientation": "auto",
+        "orientation": "vertical",
         "showValue": "always",
         "stacking": "none",
         "tooltip": {
@@ -401,7 +414,7 @@
           "refId": "A"
         }
       ],
-      "title": "Avg. Electrical Current (30min)",
+      "title": "Avg. Electrical Current - 30 min",
       "type": "barchart"
     }
   ],
@@ -412,21 +425,21 @@
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "cloud-master-01",
-          "value": "cloud-master-01"
+          "selected": true,
+          "text": "cloud-worker-03",
+          "value": "cloud-worker-03"
         },
         "datasource": {
           "type": "prometheus",
           "uid": "P1809F7CD0C75ACF3"
         },
         "definition": "label_values(powerexporter_current_ampere{job=\"power-exporter\"}, instance)",
-        "description": "The node to display power measurements for.",
+        "description": "The node to display power consumption metrics for.",
         "hide": 0,
         "includeAll": false,
         "label": "Node",
         "multi": false,
-        "name": "powermonitoring_board_node_selection_query",
+        "name": "powerexporter_selected_node",
         "options": [],
         "query": {
           "query": "label_values(powerexporter_current_ampere{job=\"power-exporter\"}, instance)",
@@ -441,13 +454,13 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
-  "timezone": "",
+  "timezone": "browser",
   "title": "Power Exporter / Power Consumption",
   "uid": "xhTLxd_7z",
-  "version": 9,
+  "version": 6,
   "weekStart": ""
 }
