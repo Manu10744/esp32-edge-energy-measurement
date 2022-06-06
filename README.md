@@ -1,11 +1,23 @@
 # Power Measurement Framework for edge-enabled IoT devices
 
-Measure the power consumption of serverless functions executed on edge-enabled devices representing the nodes in a serverless cluster. The data is pushed to and monitored by the Function Delivery Network (FDN) infrastructure (Prometheus & Grafana).<br>
-The power consumption measurements are carried out by a ESP32 powermeter.
+The goal of this thesis is to setup a power monitoring infrastructure for IoT-enabled edge devices, which are incorporated in a serverless cluster, in order to 
+
+1. ... measure and monitor the power consumption of the individual devices.
+2. ... be able to make statements about the power consumption of serverless functions executed on the respective device.
+3. ... be able to make statements about how to influence the power consumption by changing configuration settings etc.
+
+The employed edge devices are clustered using Kubernetes (k8s) and the chosen FaaS platform is OpenFaaS.
+The resulting cluster is integrated into the Function Delivery Network (FDN) which is a network of multiple, heterogeneous clusters. It already uses an existing monitoring infrastructure using Prometheus & Grafana, which has to be extended appropriately to include power consumption monitoring. This is achieved by implementing a Prometheus Exporter and integrating it into the existing infrastructure.
+
+The power consumption measurements are carried out by a ESP32 powermeter, which measures each device individually.
 
 ### System Structure
 <img src="./img/structure-diagram.png" height="100%" width="100%">
 
+<br>
+
+### Monitoring
+<img src="./img/grafana-dashboard.JPG" height="100%" width="100%">
 <br>
 
 ### Table of Contents
