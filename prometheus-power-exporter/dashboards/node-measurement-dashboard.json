@@ -23,7 +23,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 26,
-  "iteration": 1654532319632,
+  "iteration": 1654551586534,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -36,35 +36,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Ampere-seconds",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "mode": "thresholds"
           },
           "displayName": "$powerexporter_selected_node",
           "mappings": [],
@@ -73,15 +45,12 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "super-light-blue",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
-          }
+          },
+          "unit": "As (Ampere-Seconds)"
         },
         "overrides": []
       },
@@ -93,16 +62,21 @@
       },
       "id": 2,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "text": {},
+        "textMode": "auto"
       },
+      "pluginVersion": "8.4.5",
       "targets": [
         {
           "datasource": {
@@ -117,14 +91,14 @@
         }
       ],
       "title": "Total Power Consumption",
-      "type": "timeseries"
+      "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
         "uid": "P1809F7CD0C75ACF3"
       },
-      "description": "The consumed electrical current, given in ampere.",
+      "description": "The measured electrical current, given in ampere.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -180,7 +154,7 @@
               "options": {
                 "mode": "exclude",
                 "names": [
-                  "cloud-master-01"
+                  "cloud-worker-01"
                 ],
                 "prefix": "All except:",
                 "readOnly": true
@@ -239,7 +213,7 @@
         "type": "prometheus",
         "uid": "P1809F7CD0C75ACF3"
       },
-      "description": "The most recent power consumption given in ampere-seconds, determined by calculating the difference between the most recent and the previous data point.",
+      "description": "The power consumption given in ampere-seconds, determined by calculating the difference of the total power consumption at the data points x and x - 1.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -333,7 +307,7 @@
         "type": "prometheus",
         "uid": "P1809F7CD0C75ACF3"
       },
-      "description": "The average of the current consumption over the past 30 minutes, given in ampere.",
+      "description": "The average of the measured electrical currents over the past 30 minutes, given in ampere.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -414,7 +388,7 @@
           "refId": "A"
         }
       ],
-      "title": "Avg. Electrical Current - 30 min",
+      "title": "Avg. Electrical Current ( 30 min. )",
       "type": "barchart"
     }
   ],
@@ -426,8 +400,8 @@
       {
         "current": {
           "selected": true,
-          "text": "cloud-worker-03",
-          "value": "cloud-worker-03"
+          "text": "cloud-worker-01",
+          "value": "cloud-worker-01"
         },
         "datasource": {
           "type": "prometheus",
@@ -454,13 +428,13 @@
     ]
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Power Exporter / Power Consumption",
   "uid": "xhTLxd_7z",
-  "version": 6,
+  "version": 9,
   "weekStart": ""
 }
