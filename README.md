@@ -72,6 +72,9 @@ The power consumption measurements are carried out by a ESP32 powermeter, which 
 - [x] Add possibility to use `powermeasurement-udp-client` with a config file (needed for kubernetes `ConfigMap`)
 - [x] (2/2) Add ARMv7 Docker Image for `powermeasurement-udp-client` and `prometheus-power-exporter`
 - [x] (**EXTENDED HARDWARE BOARD**): Adjust the code in `esp32-power-measurement-node` in order to use both INA3221 sensors
-- [ ] (**EXTENDED HARDWARE BOARD**): Setup a full edge cluster with k3s and deploy the full monitoring stack to the cluster
+- [x] (**EXTENDED HARDWARE BOARD**): Setup a full edge cluster with k3s and deploy the full monitoring stack to the cluster
 - [x] (**EXTENDED HARDWARE BOARD**): Visualize power consumption of each device on the integrated display
   -  Idea: Display one device at a time, loop through with 1sec delay
+- [x] Integrate the power consumption monitoring into the new FDN edge cluster
+- [ ] Deploy serverless function *analyze_sent* to OpenFaaS in FDN cluster
+- [ ] Design an energy model to inference the power consumption of a device to the function invocations
