@@ -5,6 +5,6 @@ provider:
 functions:
   analyze-sent:
     lang: python3
-    handler: ./analyze_sent
+    handler: ./src
     image: phyz1x/analyze-sentence:1.0.0
 

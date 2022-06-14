@@ -1,0 +1,9 @@
+apiVersion: openfaas.com/v1
+kind: Function
+metadata:
+  name: analyze-sentence
+  namespace: openfaas-fn
+spec:
+  image: phyz1x/analyze-sentence:1.0.0
+  name: analyze-sentence
+  readOnlyRootFilesystem: false
