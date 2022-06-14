@@ -76,5 +76,5 @@ The power consumption measurements are carried out by a ESP32 powermeter, which 
 - [x] (**EXTENDED HARDWARE BOARD**): Visualize power consumption of each device on the integrated display
   -  Idea: Display one device at a time, loop through with 1sec delay
 - [x] Integrate the power consumption monitoring into the new FDN edge cluster
-- [ ] Deploy serverless function *analyze_sent* to OpenFaaS in FDN cluster
+- [x] Deploy serverless function *analyze_sent* to OpenFaaS in FDN cluster
 - [ ] Design an energy model to inference the power consumption of a device to the function invocations
