@@ -6,4 +6,9 @@ metadata:
 spec:
   image: phyz1x/analyze-sentence:1.0.0
   name: analyze-sentence
+  resources:
+    limits:
+      cpu: 200m
+    requests:
+      cpu: 200m
   readOnlyRootFilesystem: false
