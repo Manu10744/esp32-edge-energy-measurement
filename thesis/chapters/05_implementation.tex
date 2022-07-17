@@ -19,7 +19,7 @@ The source code of the individual software components that have been implemented
     
     Moreover, there are the following sub-directories:
     \begin{itemize}
-     \item \usemintedstyle{bw}\mintinline{shell-session}|docker|: Contains the \usemintedstyle{bw}\mintinline{shell-session}|Dockerfile| used for containerizing the application using Docker.
+     \item \usemintedstyle{bw}\mintinline{shell-session}|docker|: Contains the \usemintedstyle{bw}\mintinline{shell-session}|Dockerfile| used for containerizing the application for various system architectures using Docker.
      \item \usemintedstyle{bw}\mintinline{shell-session}|deploy|: Provides exemplary deployment specifications for both the client application and the supplied exemplary configuration file. 
    \end{itemize}
     
@@ -35,7 +35,7 @@ The source code of the individual software components that have been implemented
     
     Additionally, the following sub-directories are included:
     \begin{itemize}
-        \item \usemintedstyle{bw}\mintinline{shell-session}|docker|: Contains the \usemintedstyle{bw}\mintinline{shell-session}|Dockerfile| used for containerizing the application using Docker.
+        \item \usemintedstyle{bw}\mintinline{shell-session}|docker|: Contains the \usemintedstyle{bw}\mintinline{shell-session}|Dockerfile| used for containerizing the application for various system architectures using Docker.
         \item \usemintedstyle{bw}\mintinline{shell-session}|deploy|: Includes exemplary files that can be used to deploy the Prometheus exporter to Kubernetes.
         \item \usemintedstyle{bw}\mintinline{shell-session}|dashboards|: Contains the source file of the Grafana dashboard which is tailored to the implemented Prometheus exporter.
     \end{itemize}
@@ -44,7 +44,7 @@ The source code of the individual software components that have been implemented
     
     Moreover, a \usemintedstyle{bw}\mintinline{shell-session}|Makefile| is included which automates updating the Protocol Buffer message format by generating the code from \usemintedstyle{bw}\mintinline{shell-session}|powermeasurement.proto| using the respective compilers and copying the output files to the corresponding target directories of the respective sub-projects. 
     
-    \item \textit{openfaas-functions}: Includes the source code of the Natural Language Processing application named \usemintedstyle{bw}\mintinline{shell-session}|analyze_sent| which was designed as a serverless function that can be deployed to OpenFaaS.
+    \item \textit{openfaas-functions}: Includes the source code of the Natural Language Processing application named \usemintedstyle{bw}\mintinline{shell-session}|analyze-sentence| which was designed as a serverless function that can be deployed to OpenFaaS.
     
     Furthermore, a sub-directory \usemintedstyle{bw}\mintinline{shell-session}|deploy| is included which provides an exemplary deployment file that can be used to deploy the function to OpenFaaS in Kubernetes.
 \end{enumerate}

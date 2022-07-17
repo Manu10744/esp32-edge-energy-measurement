@@ -4,11 +4,11 @@ In this section, the established infrastructure required for measuring and monit
 \begin{figure}[h]
     \centering
     \includesvg[width=1\textwidth]{./figures/edge-cluster.svg}
-    \caption{Energy Measurement \& Monitoring Infrastructure of the Edge Cluster}
+    \caption{Energy measurement \& monitoring infrastructure of the Edge Cluster}
     \label{fig:fdn-edge-energy-enhancement}
 \end{figure}
 
-\section{Implementation of the Power Consumption Measurements}
+\section{Implementation of the Energy Consumption Measurements}
 Measuring the energy consumption of an electronic device is not a trivial task due to the fact that software solutions are very limited in their functionality and thus only allow for an estimation rather than an accurate measurement. Therefore, a hardware-based approach was chosen in this work in order to get more meaningful and precise data regarding the power consumption of the employed single-board computers. To this end, the power consumption measurements were carried out by a powermeter composed of a ESP32 micro-controller connected with two INA3221 sensors via I$^{2}$C, which is a short-distance, on-board communication protocol based on the master-slave architecture. The following sections aim on giving a more detailed overview over the powermeter and its components and how exactly it was interfaced in order to enable the edge devices to connect and retrieve individual measurements.
 
 \subsection{ESP32 Powermeter}
@@ -17,7 +17,7 @@ Measuring the energy consumption of an electronic device is not a trivial task d
 The ESP32 is a family of micro-controllers manufactured by the chinese company Espressif, which integrates perfectly with IoT applications due to the fact that each model has integrated support for WiFi and Bluetooth and is shipped with a multitude of different peripheral interfaces (e.g. for I$^{2}$C) that can be used to connect sensors, displays or cameras. The concrete module that was employed for this work is the ESP32-WROOM-32E, which is equipped with a 32-bit Xtensa LX6 Dual-Core microprocessor that operates at up to 240 MHz. Moreover, it is provided with 448 KB of ROM and 520 KB of SRAM and requires a power supply of around 3V - 3.6V. Figure 3.1 shows the ESP32-WROOM-32E module integrated into a development board. The ESP32 chip is especially suitable for applications where energy consumption is crucial since it has a sleep current of less than 5 µA and offers the possibility to lower the CPU clock frequency down to 80 MHz. Additionally, it has access to a low-power coprocessor that can be used instead of the CPU to perform tasks that don't require much computational power~\parencite{esp32-manual}.
 
 \subsubsection{INA3221}
-The INA3221 is a triple-channel sensor platform manufactured by Texas Instruments, which is designed to accurately measure and monitor both current and voltage for up to three unique power-supply rails. To this end, the sensor offers programmable registers that can be configured to either continuously execute measurements or to only carry out a measurement after it has been explicitly triggered. The buses monitored by the sensor can range from 0V at the minimum and 26V at the maximum, while the INA3221 itself draws a supply current of around 350 µA and requires a power supply ranging between 2.7V - 5.5V in order to be operated. Additionally, it is shipped with a I$^{2}$C- and SMBUS-compatible interface that enables the sensor to communicate with external devices such as an ESP32. Moreover, it allows for four programmable addresses (GDN, SCL, SDA and $V_{S}$), which are controlled by a single address pin~\parencite{ina3221-manual}. For the purpose of carrying out the individual configuration of the employed INA3221 sensors and issuing instructions, a suitable driver for the ESP32, which offers the necessary programming interfaces, was installed on the powermeter. Furthermore, the obtained, concrete measurements per channel were stored in-memory using an array, which was regularily updated in the event of a new measurement.
+The INA3221 is a triple-channel sensor platform manufactured by Texas Instruments, which is designed to accurately measure and monitor both current and voltage for up to three unique power-supply rails. To this end, the sensor offers programmable registers that can be configured to either continuously execute measurements or to only carry out a measurement after it has been explicitly triggered. The buses monitored by the sensor can range from 0V at the minimum and 26V at the maximum, while the INA3221 itself draws a supply current of around 350 µA and requires a power supply ranging between 2.7V - 5.5V in order to be operated. Additionally, it is shipped with a I$^{2}$C- and SMBUS-compatible interface that enables the sensor to communicate with external devices such as an ESP32. The interface allows for four different programmable addresses (GDN, SCL, SDA and $V_{S}$), which are controlled by a single address pin~\parencite{ina3221-manual}. For the purpose of carrying out the individual configuration of the employed INA3221 sensors and issuing instructions, a suitable driver for the INA3221 which offers the necessary programming interfaces was employed in the software executed by the ESP32 powermeter. Furthermore, the obtained, concrete measurements per channel were stored in-memory using an array, which was regularily updated in the event of a new measurement.
 
 In order to measure the electrical current, the INA3221 sensor uses a so-called shunt resistor at each of its channels, which generates a voltage drop across the resistor. By measuring the resulting voltage drop, the sensor is able to calculate the electrical current by applying Ohm's Law as depicted in Equation \ref{eq:ohms-law} since the shunts employ a fixed resistance. In the context of this work, a resistance of 100 $m\Omega$ was applied. Furthermore, both INA3221 were configured to use the continuous instead of the trigger-based mode for the measurement of the individual channels.
 
@@ -33,7 +33,7 @@ The total power consumption per channel was calculated by multiplying the measur
    PC_{new} = PC_{old} + \frac{(Timestamp_{new} - Timestamp_{prev})}{1000000} \cdot Current_{new}
 \end{equation}
 
-In conclusion, the employment of two INA3221 sensors made it possible to simultaneously measure both total power consumption and electrical current for up to six edge computers in total by connecting each of them to one of the available channels. In order to achieve a decent measurement accuracy, the powermeter was programmed to update the array used to store the measurements per channel approximately every ten milliseconds.
+In conclusion, the employment of two INA3221 sensors made it possible to simultaneously measure both total power consumption and electrical current for up to six edge computers in total by connecting each of them to one of the available channels. To keep track of the individual measurements, the powermeter was programmed to store the most recent measurement per channel using an array. In order to achieve a decent measurement accuracy, the array was updated with new measurements approximately every ten milliseconds.
 
 \subsection{Interfacing the Powermeter via WiFi}
 
@@ -101,11 +101,11 @@ While this was sufficient for the operation of the client application deployed t
             channel = 6
         }
     \end{lstlisting}
-    \caption{Power monitoring configuration file employed in the Edge Cluster}
+    \caption{Energy measurement configuration file employed in the Edge Cluster}
     \label{power-monitoring-config}
 \end{figure}
 
-The configuration file tailored to the edge cluster was stored centrally in Kubernetes using the \textit{ConfigMap} resource type. Due to the fact that Kubernetes offers the possibility to mount such resources to an arbitrary amount of deployments, the configuration only had to be defined and stored once in order to be used in several containers. Ultimately, after mounting the configuration file to the individual deployments of the client application hosted by the respective edge devices, the program was enabled to load the individual configuration at runtime by specifying the path to the configuration file and the node name with the help of the environment variables listed by Table \ref{tab:client-app-envs-config-file}.
+The configuration file tailored to the edge cluster was stored centrally in the Kubernetes cluster using the \textit{ConfigMap} resource type. Due to the fact that Kubernetes offers the possibility to mount such resources to an arbitrary amount of deployments, the configuration only had to be defined and stored once in order to be used in several containers. Ultimately, after mounting the configuration file to the individual deployments of the client application hosted by the respective edge devices, the program was enabled to load the individual configuration at runtime by specifying the path to the configuration file and the node name with the help of the environment variables listed by Table \ref{tab:client-app-envs-config-file}.
 
 \begin{center}
 \begin{table}[H]
@@ -116,18 +116,18 @@ The configuration file tailored to the edge cluster was stored centrally in Kube
       \hline
       \usemintedstyle{bw}\mintinline[breaklines, breakafter=_]{shell-session}|NODENAME| & The name of the node inside Kubernetes, which hosts the deployment of the client application. \\
       \hline
-      \usemintedstyle{bw}\mintinline[breaklines, breakafter=_]{shell-session}|POWERMONITORING_CONFIG_PATH| & The file system path to the configuration file to be used.\\
+      \usemintedstyle{bw}\mintinline[breaklines, breakafter=_]{shell-session}|POWERMONITORING_CONFIG_PATH| & The file system path to the energy measurement configuration file.\\
       \hline
     \end{tabular}
-    \caption{Environment variables utilized by the client application (Configuration File)}
+    \caption{Environment variables utilized by the client application (configuration file mode)}
     \label{tab:client-app-envs-config-file}
 \end{table}
 \end{center}
 
-In addition to the UDP socket established for the purpose of retrieving measurements from the ESP32 powermeter, the client application was designed to set up another UDP socket on Port 5000 that was dedicated to sending the most recently received measurement data upon a request. As a result, this provided an interface that enabled external systems or applications to retrieve the current measurement data for a specific edge device after the client application has been deployed to it.
+In addition to the UDP socket established for the purpose of retrieving measurements from the ESP32 powermeter, the client application was designed to set up a simple UDP server that was dedicated to sending the most recently received measurement data upon receiving a UDP request by creating a UDP socket on Port 5000. As a result, this provided an interface that enabled external systems or applications to retrieve the current measurement data for a specific edge device after the client application has been deployed to it.
 
 \subsubsection{Data Transmission Format}
-The exchange of structured data between systems of heterogeneous architecture over the network can be quite challenging due to the fact that issues such as different byte endianness usually lead to a false deserialization of the data at the receiving end. Additionally, encoding and decoding the data should be done with as much efficiency as possible in order to keep the induced CPU usage low and thus save energy, especially in the case of operating battery-powered edge computers. In order to cope with these challenges, \textit{protobuf-c}, which is an implementation of \textit{Google Protocol Buffers} for the programming language C, was used for serialization and deserialization of the power consumption measurements by the server and client, respectively. Protocol Buffers are beneficial due to the fact that they offer the possibility to interchange data between different systems in a language- and platform-neutral way. To this end, the data to exchange is embedded into messages, which correspond to a predefined message format, and is encoded and decoded using specific code generated by a dedicated compiler that operates on the defined Protocol Buffer message. As a result, applications are able to exchange structured data over the network independent of the programming language they are written in or the platform they run on. More importantly, Protocol Buffer messages are more lightweight when compared to the alternative methods named XML and JSON~\parencite{protobuffers} because they employ a binary instead of a text-based transfer format, which results in the serialized messages being of smaller size. As a consequence, both serialization and deserialization of the data take significantly less time, which leads to a comparatively low burden carried by the CPU. Figure \ref{power-protobuf} shows the defined Protocol Buffer message employed for the purpose of this work in order to represent a power consumption measurement carried out by the ESP32 powermeter.
+The exchange of structured data between systems of heterogeneous architecture over the network can be quite challenging due to the fact that issues such as different byte endianness usually lead to a false deserialization of the data at the receiving end. Additionally, encoding and decoding the data should be done with as much efficiency as possible in order to keep the induced CPU usage low and thus save energy, which is especially important in the case of operating battery-powered edge computers. In order to cope with these challenges, \textit{protobuf-c}, which is an implementation of \textit{Google Protocol Buffers} for the programming language C, was used for serialization and deserialization of the power consumption measurements by the server and client, respectively. Protocol Buffers are beneficial due to the fact that they offer the possibility to interchange data between different systems in a language- and platform-neutral way. To this end, the data to exchange is embedded into messages, which correspond to a predefined message format, and is encoded and decoded using specific code generated by a dedicated compiler that operates on the defined Protocol Buffer message. As a result, applications are able to exchange structured data over the network independent of the programming language they are written in or the platform they run on. More importantly, Protocol Buffer messages are more lightweight when compared to the alternative methods named XML and JSON~\parencite{protobuffers} because they employ a binary instead of a text-based transfer format, which results in the serialized messages being of smaller size. As a consequence, both serialization and deserialization of the data take significantly less time, which leads to a comparatively low burden carried by the CPU. Figure \ref{power-protobuf} shows the defined Protocol Buffer message employed for the purpose of this work in order to represent a power consumption measurement carried out by the ESP32 powermeter.
 
 \begin{figure}[h]
     \centering
@@ -145,7 +145,7 @@ The exchange of structured data between systems of heterogeneous architecture ov
     \label{power-protobuf}
 \end{figure}
 
-\section{Integration of Power Consumption Monitoring}
+\section{Integration of Energy Consumption Monitoring}
 In order to extend the existing monitoring infrastructure by the energy consumption of the individual edge computers, Prometheus had to be given the possibility to query the corresponding data from the respective devices that are being monitored. To this end, the relevant data had to be wrapped into appropriately formatted metrics that can be accessed via HTTP requests due to the poll-based data collection model of Prometheus. Prometheus offers client libraries that are available for a wide range of programming languages that can be made use of in order to implement an exporter application, which is responsible for collecting the data of interest and to transform it into metrics that are processable for Prometheus. Consequently, an appropriate Prometheus exporter was implemented in Python for the purpose of this work. Table \ref{tab:prometheus-metrics} gives an overview over the individual power-related Prometheus metrics provided by the exporter. 
 
 
@@ -166,7 +166,7 @@ In order to extend the existing monitoring infrastructure by the energy consumpt
 \end{table}
 \end{center}
 
-In order to collect the necessary data and to subsequently update the individual metrics, the Prometheus exporter was enabled to query the most up-to-date measurement data from the respective device that it monitors by establishing a UDP socket, which set up a communication channel to the UDP server operated by the client application that continuously retrieves the data from the powermeter. For the purpose of decoding the Protocol Buffer messages that were received, \textit{betterproto} was employed, which is a Protocol Buffer implementation for Python. Due to the fact that the total power consumption and the measured eletrical current extracted from the received Protocol Buffer messages are specified in mA and mAs respectively, the metrics provided by the Prometheus exporter were updated by dividing the corresponding values by 1000 since they are designed to be indicated in As and A. Additionally, in order to frequently update the individual metrics, the exporter has been programmed to poll the latest data using a request interval of three seconds. The individual metrics were exposed via the HTTP endpoint \usemintedstyle{bw}\mintinline[breaklines, breakafter=_]{shell-session}|/metrics| by a basic web server operated by the Prometheus exporter on Port 8000.
+In order to collect the necessary data and to subsequently update the individual metrics, the Prometheus exporter was enabled to query the most up-to-date measurement data from the respective device that it monitors by establishing a UDP socket, which set up a communication channel to the UDP server operated by the client application that continuously retrieves the data from the powermeter. For the purpose of decoding the Protocol Buffer messages that were received, \textit{betterproto} was employed, which is a Protocol Buffer implementation for Python. Due to the fact that the total power consumption and the measured eletrical current extracted from the received Protocol Buffer messages are specified in mA and mAs respectively, the metrics provided by the Prometheus exporter were updated by dividing the corresponding values by 1000 since they are designed to be indicated in As and A. Additionally, in order to frequently update the individual metrics, the exporter has been programmed to poll the latest data using a request interval of three seconds. The individual metrics were exposed via the HTTP endpoint \usemintedstyle{bw}\mintinline[breaklines, breakafter=_]{shell-session}|/metrics| by a basic web server operated on Port 8000.
 
 Similar to the configuration of the client application, the Prometheus exporter was designed to rely on a set of inputs, which were passed with the help of the environment variables listed by Table \ref{tab:exporter-envs}.
 
@@ -289,5 +289,30 @@ After deploying the exporter application as well as the client application to ea
     \label{promql-current}
 \end{figure}
 
-\section{Inference of Power Consumption to Executions of Serverless Functions}
-In order to distribute the energy consumption of a specific edge computer among the individual executions of the employed serverless functions, ...
+\section{Inference of Energy Consumption to Executions of Serverless Functions}
+In order to distribute the energy consumption of a specific edge computer among the individual executions of the employed serverless functions, the following information is collected:
+
+\begin{itemize}
+    \item CPU Usage of the Pod:
+    \item Serverless Function Pod Resource Specifications:
+    \item Energy Consumption:
+\end{itemize}
+
+In order to demonstrate the chosen approach, the following serverless functions were installed to OpenFaaS and subsequently executed on the employed edge devices:
+
+\begin{center}
+\begin{table}[H]
+\centering
+\begin{tabular}{| p{0.3\linewidth} | p{0.6\linewidth} |}
+ \hline
+ Function Name & Description \\ [0.5ex] 
+ \hline\hline
+ \usemintedstyle{bw}\mintinline[breaklines, breakafter=_]{shell-session}|analyze-sentence| & Performs an Natural Language Processing analysis on a given sentence. \\ 
+ \hline
+ \usemintedstyle{bw}\mintinline[breaklines, breakafter=_]{shell-session}|nodeinfo| & Outputs various information about the underlying system hosting the serverless function. \\ 
+ \hline
+\end{tabular}
+\caption{Employed Serverless Functions}
+\label{table:deployed-functions}
+\end{table}
+\end{center}

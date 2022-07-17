@@ -1,23 +1,26 @@
 # Power Measurement Framework for edge-enabled IoT devices
 
-The goal of this thesis is to setup a power monitoring infrastructure for IoT-enabled edge devices, which are incorporated in a serverless cluster, in order to 
+The goal of this thesis is to setup a power monitoring infrastructure for IoT-enabled edge devices, which are operated in a serverless cluster, in order to: 
 
-1. ... measure and monitor the power consumption of the individual devices.
-2. ... be able to make statements about the power consumption of serverless functions executed on the respective device.
-3. ... be able to make statements about how to influence the power consumption by changing configuration settings etc.
+- Measure and monitor the power consumption of the individual devices.
+- Be able to make statements about the power consumption of serverless functions executed on the respective device.
+- Be able to make statements about how to influence the power consumption by changing configuration settings etc.
 
-The employed edge devices are clustered using Kubernetes (k8s) and the chosen FaaS platform is OpenFaaS.
-The resulting cluster is integrated into the Function Delivery Network (FDN) which is a network of multiple, heterogeneous clusters. It already uses an existing monitoring infrastructure using Prometheus & Grafana, which has to be extended appropriately to include power consumption monitoring. This is achieved by implementing a Prometheus Exporter and integrating it into the existing infrastructure.
+The cluster was established using Kubernetes (k8s) and the chosen FaaS platform is OpenFaaS.
+The resulting cluster is integrated into the Function Delivery Network (FDN) which is a network of multiple, heterogeneous clusters.
 
-The power consumption measurements are carried out by a ESP32 powermeter, which measures each device individually.
+As the FDN already uses an existing monitoring infrastructure based on Prometheus & Grafana, a custom Prometheus exporter was implemented in order to extend the monitoring with metrics related to the energy consumption of the employed edge devices.
 
-### System Structure
-<img src="./img/structure-diagram.png" height="100%" width="100%">
+The power consumption measurements are carried out by a ESP32 powermeter, which measures each device individually using INA3221 sensors. 
+
+### Energy Measurement & Monitoring Infrastructure
+<img src="./thesis/figures/edge-cluster.svg" height="100%" width="100%">
 
 <br>
 
-### Monitoring
-<img src="./img/grafana-dashboard.JPG" height="100%" width="100%">
+### Established Monitoring
+<img src="./thesis/figures/grafana-dashboard-dark.png" height="100%" width="100%">
+
 <br>
 
 ### Table of Contents
