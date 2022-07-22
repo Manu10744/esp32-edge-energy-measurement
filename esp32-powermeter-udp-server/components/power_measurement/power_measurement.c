@@ -65,9 +65,9 @@ void start_power_measurements(void *task_param) {
     ina3221_sensors[1] = ina3221_gnd;
 
     init_measurements();
-    ESP_LOGI(TAG, "Initialization finished!");
+    ESP_LOGI(TAG, "Initialization of the Power Measurements finished.");
 
-    ESP_LOGI(TAG, "Starting the channel measurements! (INA3221 sensors: %d | Available channels: %d)",
+    ESP_LOGI(TAG, "Starting the Power Measurements! (INA3221 sensors: %d | Available channels: %d)",
              AMOUNT_OF_SENSORS, AMOUNT_OF_CHANNELS);
     while (1) {
         for (uint8_t channel = 1; channel <= AMOUNT_OF_CHANNELS; channel++) {
@@ -85,7 +85,7 @@ void start_power_measurements(void *task_param) {
  */
 PowerMeasurement get_measurement(uint8_t channel) {
     if (channel > AMOUNT_OF_CHANNELS) {
-        ESP_LOGE(TAG, "Unknown channel: %d", channel);
+        ESP_LOGE(TAG, "Cannot get measurement: Unknown channel %d", channel);
     }
     return measurements[channel - 1];
 }

@@ -20,7 +20,8 @@
 #define WIFI_PASSWORD "caps!schulz-wifi"
 #endif
 
-#define WIFI_MAX_RETRIES CONFIG_WIFI_MAX_RETRIES
+#define WIFI_MAX_RECONNECTS CONFIG_WIFI_MAX_RECONNECTS
+#define WIFI_RECONNECT_WAIT_INTERVAL_SECONDS CONFIG_WIFI_RECONNECT_WAIT_INTERVAL_SECONDS
 
 static const char *TAG = "WIFI";
 
@@ -31,25 +32,29 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_CONNECTED_BIT BIT0 // connected to the AP with an IP
 #define WIFI_FAIL_BIT      BIT1 // failed to connect
 
-static int retry_counter = 0;
+static int reconnect_counter = 0;
 
 static void event_handler(void* arg, esp_event_base_t event_base,
                           int32_t event_id, void* event_data) {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        if (retry_counter < WIFI_MAX_RETRIES) {
+        if (reconnect_counter < WIFI_MAX_RECONNECTS) {
+            ESP_LOGW(TAG, "WiFi connection could not be established or the existing connection got closed.");
+            ESP_LOGI(TAG, "Waiting for %d seconds before initiating WiFi Reconnect...", WIFI_RECONNECT_WAIT_INTERVAL_SECONDS);
+            vTaskDelay(pdMS_TO_TICKS(WIFI_RECONNECT_WAIT_INTERVAL_SECONDS * 1000));
+
+            ESP_LOGI(TAG, "[%d/%d] Trying to reconnect to the WiFi AP ...", reconnect_counter, WIFI_MAX_RECONNECTS);
             esp_wifi_connect();
-            retry_counter++;
-            ESP_LOGW(TAG, "Retrying to connect to the AP ...");
+            reconnect_counter++;
         } else {
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
         }
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        retry_counter = 0;
-
-        ESP_LOGI(TAG, "Connection successful, got assigned an IP: " IPSTR, IP2STR(&event->ip_info.ip));
+        ESP_LOGI(TAG, "Connection to the WiFi AP was successful! Assigned IP: " IPSTR, IP2STR(&event->ip_info.ip));      
+        
+        reconnect_counter = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
 }
@@ -113,7 +118,7 @@ void connect_to_wifi(void) {
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start() );
 
-    ESP_LOGI(TAG, "WiFi configuration initialization finished.");
+    ESP_LOGI(TAG, "Initialization of the WiFi Configuration finished.");
 
     /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
      * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
@@ -132,9 +137,4 @@ void connect_to_wifi(void) {
     } else {
         ESP_LOGE(TAG, "An unexpected event occured.");
     }
-
-    /* The event will not be processed after unregister */
-    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip));
-    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id));
-    vEventGroupDelete(s_wifi_event_group);
 }

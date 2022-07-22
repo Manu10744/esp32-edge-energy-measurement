@@ -6,6 +6,8 @@
 #include "esp_log.h"
 #include "lwip/sockets.h"
 #include <ssd1306.h>
+#include <errno.h>
+#include <string.h>
 
 #include "wifi.h"
 #include "power_measurement.h"
@@ -47,7 +49,7 @@ void app_main(void) {
 
 #ifdef CONFIG_USE_SSD1306_DISPLAY
     // Step 2: Activate SSD1306 display
-    ESP_LOGI(TAG, "Using the SSD1306 display!");
+    ESP_LOGI(TAG, "Using the SSD1306 display to visualize the measurements!");
     xTaskCreate(show_measurements, "display_power_measurements", configMINIMAL_STACK_SIZE * 8, NULL, 2, NULL);
 #endif
 
@@ -85,7 +87,6 @@ static void start_udp_server(void *task_param) {
     int addr_family = (int)task_param;
     int ip_protocol = 0;
     struct sockaddr_in6 server_addr;
-    size_t accepted_clients = 0;
 
     ESP_LOGI(TAG, "Trying to setup a UDP server on port %d ...", PORT);
     while (1) {
@@ -197,8 +198,12 @@ static void serve_client(void *task_param) {
         free(tx_buffer);
 
         if (err < 0) {
-            ESP_LOGE(TAG, "Error occurred during sending data to client requesting channel %d: errno %d", errno, client.requested_channel);
-            break;
+            if (errno == 118) {
+                ESP_LOGE(TAG, "Error occured during sending data to client requesting channel %d: WiFi Connection is absent.", client.requested_channel);
+            } else {
+                ESP_LOGE(TAG, "Error occurred during sending data to client requesting channel %d: %s (errno %d)", client.requested_channel, strerror(errno), errno);
+                break;
+            }
         }
 
         vTaskDelay(pdMS_TO_TICKS(SEND_INTERVAL_MS));
@@ -260,11 +265,12 @@ static bool validate_request(char received_data[]) {
 static void show_measurements(void *task_param) {
     char buffer[200];
 
-    ESP_LOGI(TAG, "Initializing SSD1306 display ...");
+    ESP_LOGI(TAG, "Initializing SSD1306 Display ...");
     ssd1306_128x64_i2c_init();
     ssd1306_128x64_init();
     ssd1306_setFixedFont(ssd1306xled_font6x8);
     ssd1306_clearScreen();
+    ESP_LOGI(TAG, "Initialization of the SSD1306 Display finished.");
 
     sprintf(buffer, "Hello :)");
     ssd1306_printFixedN(0, 0, buffer, STYLE_NORMAL, 2);

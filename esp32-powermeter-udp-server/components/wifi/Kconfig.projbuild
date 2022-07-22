@@ -12,10 +12,15 @@ menu "WiFi Connection Settings"
 
     endchoice
 
-    config WIFI_MAX_RETRIES
-        int "Maximum amount of connection retries"
-        range 0 10
+    config WIFI_MAX_RECONNECTS
+        int "Maximum amount of WiFi Reconnection attempts"
+        default 5
+        help
+            How many WiFi Reconnect attempts should be executed if the initial connection to the WiFi AP does not succeed at the first attempt or the existing connection gets closed all of a sudden?
+
+    config WIFI_RECONNECT_WAIT_INTERVAL_SECONDS
+        int "WiFi Reconnect attempt timeout in s (seconds)"
         default 3
         help
-            How many connection retries should be executed if the connection to the WiFi AP does not succeed at the first attempt?
+            How many seconds to wait after each failed WiFi Reconnect attempt?
 endmenu
