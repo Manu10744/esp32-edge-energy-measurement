@@ -2,6 +2,7 @@
 - Dynamic Voltage & Frequency Scaling (DVFS)<br>
 See also https://wiki.archlinux.org/title/CPU_frequency_scaling
 
+### Scaling governors
 Cited from `StackOverflow` (https://unix.stackexchange.com/questions/87522/why-do-cpuinfo-cur-freq-and-proc-cpuinfo-report-different-numbers):
 <br>
 There are multiple "modes" a CPU can be operated in, which is called the scaling governor. The available governors can be listed by the following command:
@@ -17,6 +18,7 @@ The current scaling governor can be listed by the following command:
 cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 ```
 
+### Change the current active scaling governor
 The scaling governor can be changed by echoing the name of a different governor into the file.<br>
 **Note**: only possible with root access.
 
@@ -24,26 +26,38 @@ The scaling governor can be changed by echoing the name of a different governor 
 echo <new_governor> > /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 ```
 
+The governor `userspace` offers to set specific values for the CPU frequency. It can be selected like so:
+```
+echo userspace > /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+```
+
+After it has been selected, the user can set a specific speed for the CPU, but only within the limits of
+scaling_min_freq and scaling_max_freq:
+
+```
+echo 900000 > /sys/devices/system/cpu/cpu*/cpufreq/scaling_setspeed
+```
+
 The files `cpuinfo_*` (for example `cpuinfo_cur_freq`) rather have more to do with the specification of the CPU and which profile it's currently in, rather than anything useful with respect to how the CPU is currently operating. For actual operational telemetry I'd use the `scaling_*` kernel tunables.
 
 
 - Display current CPU frequency
 
-    Displayed in Hertz.
+    Displayed in Kilo-Hertz (kHz).
     ```
     cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
     ```
 
 - Display max CPU frequency
 
-    Displayed in Hertz.
+    Displayed in Kilo-Hertz (kHz).
     ```
     cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     ```
 
 - Display min CPU frequency (Desired Idle Freq.)
 
-    Displayed in Hertz.
+    Displayed in Kilo-Hertz (kHz).
     ```
     cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
     ```
