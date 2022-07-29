@@ -1,4 +1,9 @@
-# Configuration Adjustments
+# Table of Contents
+
+1. [Influencing the Power Consumption via Configuration Adjustments](#configuration-adjustments)
+2. [Inference of Total Energy Consumption to Serverless Functions](#inference-of-total-energy-consumption-to-serverless-functions)
+
+## Influencing the Power Consumption via Configuration Adjustments
 - Dynamic Voltage & Frequency Scaling (DVFS)<br>
 See also https://wiki.archlinux.org/title/CPU_frequency_scaling
 
@@ -64,11 +69,7 @@ The files `cpuinfo_*` (for example `cpuinfo_cur_freq`) rather have more to do wi
 
 Additional documentation can be found in https://www.kernel.org/doc/Documentation/cpu-freq/user-guide.txt
 
-<br>
-<hr>
-<br>
-
-## Raspberry Pi
+### Raspberry Pi
 
 - Minimum CPU Frequency: 700 MHz
 - Maximum CPU Frequency: 1200 MHz
@@ -78,8 +79,6 @@ Available scaling steps (`scaling_available_frequencies`):
 - 700 MHz
 - ...
 - 1200 MHz
-
-<br>
 
 ### ODROID-XU4
 - Minimum CPU Frequency: 600 MHz
@@ -95,9 +94,6 @@ Available scaling steps (`scaling_available_frequencies`):
 
 According to https://wiki.odroid.com/odroid-xu4/application_note/software/cpufrequtils_cpufreq_govornor, the CPU frequency can be adjusted using the tool `cpufrequtils`.
 
-
-<br>
-
 ### Google Coral Dev Board
 - Minimum CPU Frequency: 500 MHz
 - Maximum CPU Frequency: 1500 MHz
@@ -107,8 +103,18 @@ Available scaling steps (`scaling_available_frequencies`):
 - 1000 MHz
 - 1500 MHz
 
-<br>
-
 ### Jetson Nano
 
-<br>
+
+<hr>
+
+## Inference of Total Energy Consumption to Serverless Functions
+
+- CPU Utilization of Node (1 minute):
+  ```
+  100 - (avg by (instance) (rate(node_cpu_seconds_total{job="node-exporter",mode="idle"}[1m])) * 100)
+  ```
+- Energy Consumption of Node (1 minute)
+  ```
+  idelta(powerexporter_power_consumption_ampere_seconds_total[2m:1m])
+  ```
