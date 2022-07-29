@@ -43,6 +43,7 @@ The power consumption measurements are carried out by a ESP32 powermeter, which 
 - [INA3221 Strommessung](https://www.raspberry-pi-geek.de/ausgaben/rpg/2019/02/strom-und-spannungssensor-ina3221/)
 - [Prometheus metric types](https://prometheus.io/docs/concepts/metric_types/#summary)
 - [Protobuffers](https://developers.google.com/protocol-buffers/docs/proto3)
+- [Measure CPU Utilization with Prometheus Node Exporter](https://www.robustperception.io/understanding-machine-cpu-usage/)
 
 
 #
@@ -65,13 +66,11 @@ The power consumption measurements are carried out by a ESP32 powermeter, which 
   - Goal: 2 running exporters exposing the real data, 2 panels in grafana visualizing it
 - [x] Send the measured current to the client as well, not just the consumed energy. 
   - This will require sending structured data => Implement protocolbuffers
-- [ ] Enable hostname resolution in `powermeasurement-udp-client` => Both IP and hostname are now valid inputs
 - [x] Build and upload Docker Images of `powermeasurement-udp-client` and `prometheus-power-exporter` for different architectures (ARM64v8, AMD64)
 - [x] Add a dummy powermeasurement server to the LRZ Cloud Cluster as the "real" ESP32 server is not accessible in that network
 - [x] Deploy `powermeasurement-udp-client` and `prometheus-power-exporter` to each worker node in the LRZ Cloud cluster
   - Extend `example.jsonnet` in `kube-prometheus` accordingly and recompile manifests
   - Ensure that everything works on Grafana's end
-- [ ] Add `dashboards.libsonnet` to `prometheus-power-exporter` and include it in the `kube-prometheus` grafana instance.
 - [x] Add possibility to use `powermeasurement-udp-client` with a config file (needed for kubernetes `ConfigMap`)
 - [x] (2/2) Add ARMv7 Docker Image for `powermeasurement-udp-client` and `prometheus-power-exporter`
 - [x] (**EXTENDED HARDWARE BOARD**): Adjust the code in `esp32-power-measurement-node` in order to use both INA3221 sensors
