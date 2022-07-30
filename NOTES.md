@@ -107,14 +107,33 @@ Available scaling steps (`scaling_available_frequencies`):
 
 
 <hr>
+<br>
 
 ## Inference of Total Energy Consumption to Serverless Functions
+Useful Prometheus PromQL Queries:
 
-- CPU Utilization of Node (1 minute):
+- CPU Utilization of Node (1 minute)<br>
+  Result is given in **Percentage**.
   ```
   100 - (avg by (instance) (rate(node_cpu_seconds_total{job="node-exporter",mode="idle"}[1m])) * 100)
   ```
-- Energy Consumption of Node (1 minute)
+- CPU Utilization of Serverless Function Container (1 minute)<br>
+  Result is given in **Number of Cores**.
+  ```
+  (rate(container_cpu_usage_seconds_total{container="gzipcompression", image!="", container_name!="POD"}[1m]) > 0)
+  ```
+- Energy Consumption of Node (1 minute)<br>
+  Result is given in **Ampere-Seconds (As)**
   ```
   idelta(powerexporter_power_consumption_ampere_seconds_total[2m:1m])
   ```
+- Amount of CPU Cores per machine
+  ```
+  machine_cpu_cores
+  
+  # For node 'odroidxu4-2':
+  machine_cpu_cores{node="odroidxu4-2"}
+  ```
+  
+#### Issues:
+  - Metrics from `node-exporter` and `cadvisor` are not scraped at the same time by Prometheus. Mixing those two metric providers in order to compute the proportionate CPU Usage of the Pod of the serverless function will sometimes lead to incorrect results and therefore lead to wrong distribution of the energy consumption.
