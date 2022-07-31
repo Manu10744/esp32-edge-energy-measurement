@@ -11,7 +11,7 @@ The resulting cluster is integrated into the Function Delivery Network (FDN) whi
 
 As the FDN already uses an existing monitoring infrastructure based on Prometheus & Grafana, a custom Prometheus exporter was implemented in order to extend the monitoring with metrics related to the energy consumption of the employed edge devices.
 
-The power consumption measurements are carried out by a ESP32 powermeter, which measures each device individually using INA3221 sensors. 
+The energy consumption measurements are carried out by a ESP32 powermeter, which measures each device individually using INA3221 sensors. 
 
 ### Energy Measurement & Monitoring Infrastructure
 <img src="./thesis/figures/edge-cluster.svg" height="100%" width="100%">
@@ -19,6 +19,7 @@ The power consumption measurements are carried out by a ESP32 powermeter, which 
 <br>
 
 ### Established Monitoring
+The monitoring is facilitated by a custom Grafana Dashboard, which shows the total energy consumption of all Kubernetes edge nodes (bar chart at the top) as well as the amount of energy consumed within the recent `15s` (graph at the bottom left) and the measured electrical current (graph at the bottom right).
 <img src="./thesis/figures/grafana-dashboard-dark.png" height="100%" width="100%">
 
 <br>
@@ -42,8 +43,12 @@ The power consumption measurements are carried out by a ESP32 powermeter, which 
 - [VSCode ESP32 IDF Plugin Docs](https://github.com/espressif/vscode-esp-idf-extension/blob/master/docs/tutorial/toc.md)
 - [INA3221 Strommessung](https://www.raspberry-pi-geek.de/ausgaben/rpg/2019/02/strom-und-spannungssensor-ina3221/)
 - [Prometheus metric types](https://prometheus.io/docs/concepts/metric_types/#summary)
-- [Protobuffers](https://developers.google.com/protocol-buffers/docs/proto3)
-- [Measure CPU Utilization with Prometheus Node Exporter](https://www.robustperception.io/understanding-machine-cpu-usage/)
+- [Protocol Buffers - Google Docs](https://developers.google.com/protocol-buffers/docs/proto3)
+- CPUfreq - Adjust CPU Clock Speed of linux-based systems
+  - [CPUfreq - Official Docs](https://www.kernel.org/doc/Documentation/cpu-freq/user-guide.txt)
+  - [CPUfreq - RedHat Docs](https://access.redhat.com/documentation/de-de/red_hat_enterprise_linux/6/html/power_management_guide/tuning_cpufreq_policy_and_speed)
+  - [CPUfreq - Scaling governors](https://wiki.somlabs.com/index.php/How_to_scale_CPU_frequency_with_DVFS_framework)
+- [Monitor System CPU Utilization with Prometheus Node Exporter](https://www.robustperception.io/understanding-machine-cpu-usage/)
 
 
 #

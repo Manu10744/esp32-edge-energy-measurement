@@ -109,7 +109,7 @@ Available scaling steps (`scaling_available_frequencies`):
 <hr>
 <br>
 
-## Inference of Total Energy Consumption to Serverless Functions
+## Inference of Energy Consumption to Serverless Functions
 Useful Prometheus PromQL Queries:
 
 - CPU Utilization of Node (1 minute)<br>
@@ -136,4 +136,7 @@ Useful Prometheus PromQL Queries:
   ```
   
 #### Issues:
-  - Metrics from `node-exporter` and `cadvisor` are not scraped at the same time by Prometheus. Mixing those two metric providers in order to compute the proportionate CPU Usage of the Pod of the serverless function will sometimes lead to incorrect results and therefore lead to wrong distribution of the energy consumption.
+`node-exporter` exposes resource usage metrics related to the system, `cAdvisor` exposes resource usage metrics related to containers. When using metrics from both sources in a formula in order to distribute the energy consumption, the following issues arise:
+  - **Scraping Interval:** The interval that is used by Prometheus in order to collect the data from the individual sources are not necessarily the same for `cAdvisor` and `node-exporter` metrics. Though, this can easily be changed by configuring the same scraping interval for both targets in the Prometheus configuration.
+  - **Implementation:** `cAdvisor` and `node-exporter` are not the same in terms of functionality. `cAdvisor` has its own data gathering loop and in addition to that, they can sometimes be delayed by fractions of a second. This is why the total cpu usage of a system at time `t`, as obtained from `node-exporter`, does not necessarily make sense when compared with the container cpu usage at time `t`, as obtained from `cAdvisor`.
+  - **Scraping Time:**  Prometheus does not scrape both sources at the exact same time, which adds to the problem of inaccuracy. 
