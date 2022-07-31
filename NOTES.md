@@ -161,27 +161,31 @@ Useful Prometheus PromQL Queries:
    energy_map = {}
    cpu_map = {}
 
-   for each fn-container:
-    # Init mapping:  function-container -> (node -> CPU Proportion of function-container)
+   for each serverless function:
+    # The pods are named differently, so we use the container name, as it is always the same
+    fn_container = get_container_name(serverless function)
+
+    # Initialize cpu usage mapping:
+    # fn-container -> (node -> CPU Proportion of all containers of function on that node)
     cpu_map.add(fn-container, {})
 
-    # Get Nodes for that function
-    nodes = nodes(fn-container)
+    # Get all nodes that run one or more containers of that function
+    nodes = get_nodes(fn-container)
 
     for each node in nodes:
-      # Step 1: Get Energy consumption of node
-      node_energy_consumption = idelta(powerexporter_power_consumption_ampere_seconds_total{instance='" + INSTANCE + "'}[2m:1m])
-
+      # Step 1: Get Energy consumption of that node
+      node_energy_consumption = idelta(powerexporter_power_consumption_ampere_seconds_total{instance=node}[2m:1m])
       energy_map.add(node, node_energy_consumption)
 
-      # Step 2: Get CPU Usage of function container on that node
-      fn_container_cpu_usage = rate(container_cpu_usage_seconds_total{image!="", container=fn-container,container_name!="POD", node=node}[1m])
+      # Step 2: Get CPU Usage of function container(s) that are deployed to that node. 
+      # We can sum up the cpu usage of all containers of that function to include the case in which the function is scaled and there is more than 1 container of that specific function deployed on that node
+      fn_container_cpu_usage = sum(rate(container_cpu_usage_seconds_total{image!="", container=fn_container, container_name!="POD", node=node}[1m]))
 
+      # Step 3: Compute the sum of cpu usages of all containers deployed to that node
       node_cpu_usage = sum(rate(container_cpu_usage_seconds_total{image!="", container_name!="POD", node=node}[1m]))
 
-      fn_container_cpu_usage_proportion = cpu_usage / node_cpu_usage
-
-      # Step 3: Add proportionate cpu usage to function map
+      # Step 4: Compute proportionate cpu usage of the function container(s) and update function map
+      fn_container_cpu_usage_proportion = fn_container_cpu_usage / node_cpu_usage
       cpu_map.get(fn-container).add(node, fn_container_cpu_usage_proportion)
    ```
 
@@ -223,3 +227,8 @@ Useful Prometheus PromQL Queries:
    Energy Consumption (`analyze-sentence`): (0,50 * 56) + (0,41176 * 25) = **~38,3 As**<br>
    Energy Consumption (`gzip-compression`): (0,45121 * 56) + (0,44117 * 25) = **~36 As**
 
+  **Advantages:**
+  - This is very suitable for multiple functions deployed and running on a specific node at the same time
+
+  **Disadvantages:**
+  - Node CPU usage is only determined by the sum of container cpu usages => less accurate than as obtained from `node-exporter`
