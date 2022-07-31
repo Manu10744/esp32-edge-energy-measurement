@@ -136,7 +136,90 @@ Useful Prometheus PromQL Queries:
   ```
   
 #### Issues:
-`node-exporter` exposes resource usage metrics related to the system, `cAdvisor` exposes resource usage metrics related to containers. When using metrics from both sources in a formula in order to distribute the energy consumption, the following issues arise:
+- `node-exporter` exposes resource usage metrics related to the system, `cAdvisor` exposes resource usage metrics related to containers. When using metrics from both sources in a formula in order to distribute the energy consumption, the following issues arise:
   - **Scraping Interval:** The interval that is used by Prometheus in order to collect the data from the individual sources are not necessarily the same for `cAdvisor` and `node-exporter` metrics. Though, this can easily be changed by configuring the same scraping interval for both targets in the Prometheus configuration.
   - **Implementation:** `cAdvisor` and `node-exporter` are not the same in terms of functionality. `cAdvisor` has its own data gathering loop and in addition to that, they can sometimes be delayed by fractions of a second. This is why the total cpu usage of a system at time `t`, as obtained from `node-exporter`, does not necessarily make sense when compared with the container cpu usage at time `t`, as obtained from `cAdvisor`.
   - **Scraping Time:**  Prometheus does not scrape both sources at the exact same time, which adds to the problem of inaccuracy. 
+
+  <br>
+
+  **Possible solutions**: 
+  - An alternative way to compute the proportion of the CPU Usage of the serverless functions would be to only employ one data source for CPU Usage. The minimum requirement is to get container cpu metrics, so in this case, `cAdvisor` would be the chosen option. That way one could compute ...
+    - the sum of the CPU Usage of all containers that are deployed to the specific node.
+    - the CPU Usage of the serverless function container.<br>
+      **Case 1:** If it is non-scaling, so there is only 1 container/pod of that function, then there will be only 1 result vector per query.<br>
+      **Case 2:** If it is scaled, so if there is multiple containers/pods for that function, then group by node and sum the CPU Usages of the containers per node.
+
+   Then, the proportion can be computed by calculating `CPU Usage of Serverless Function Container(s) / Sum of CPU Usage of all Containers`.
+
+  <br>
+
+  Pseudo Code:<br>
+  (Under the assumption of executing the Prometheus query 1x per minute, thus the CPU Usage and Energy Consumption within the past 60 secs are taken into account here)
+
+   ```python
+   energy_map = {}
+   cpu_map = {}
+
+   for each fn-container:
+    # Init mapping:  function-container -> (node -> CPU Proportion of function-container)
+    cpu_map.add(fn-container, {})
+
+    # Get Nodes for that function
+    nodes = nodes(fn-container)
+
+    for each node in nodes:
+      # Step 1: Get Energy consumption of node
+      node_energy_consumption = idelta(powerexporter_power_consumption_ampere_seconds_total{instance='" + INSTANCE + "'}[2m:1m])
+
+      energy_map.add(node, node_energy_consumption)
+
+      # Step 2: Get CPU Usage of function container on that node
+      fn_container_cpu_usage = rate(container_cpu_usage_seconds_total{image!="", container=fn-container,container_name!="POD", node=node}[1m])
+
+      node_cpu_usage = sum(rate(container_cpu_usage_seconds_total{image!="", container_name!="POD", node=node}[1m]))
+
+      fn_container_cpu_usage_proportion = cpu_usage / node_cpu_usage
+
+      # Step 3: Add proportionate cpu usage to function map
+      cpu_map.get(fn-container).add(node, fn_container_cpu_usage_proportion)
+   ```
+
+  Sample result when assuming the following values:
+
+  |      node   | Sum of Container CPU Usage (Cores) obtained from Prom Query |
+  |-------------|------------------------------------|
+  | odroidxu4-1 | 8.20                               |
+  | raspberrypi | 3.4                                |
+
+  |      function                  | CPU Core Limit | CPU Core Usage obtained from Prom Query |   |
+  |--------------------------------|----------------|----------------|---|
+  | analyze-sentence (odroidxu4-1) | 4              | 4.1            |   |
+  | analyze-sentence (raspberrypi) | 1.5            | 1.4            |   |
+  | gzip-compression (odroidxu4-1) | 4              | 3.7            |   |
+  | gzip-compression (raspberrypi) | 1.5            | 1.5            |   |
+
+
+   ```python
+  # Energy Consumption Map
+   {
+    "odroidxu4-1": 56,
+    "raspberrypi": 25
+   }
+
+  # CPU Usage Map
+   {
+    "analyze-sentence": {
+      "odroidxu4-1": 0,50,
+      "raspberrypi": 0,41176
+    },
+    "gzip-compression": {
+      "odroidxu4-1": 0,45121,
+      "raspberrypi": 0,44117
+    }
+   }
+   ```
+
+   Energy Consumption (`analyze-sentence`): (0,50 * 56) + (0,41176 * 25) = **~38,3 As**<br>
+   Energy Consumption (`gzip-compression`): (0,45121 * 56) + (0,44117 * 25) = **~36 As**
+
